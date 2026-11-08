@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="free26">
   <meta name="description" content="Личный дневник челленджа free26">
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <title>free26</title>
   <style>
@@ -44,7 +45,7 @@
     .day-btn.today .day-num{width:24px;height:24px;border-radius:50%;background:#f4f4f5;color:#111;display:grid;place-items:center}
     .day-mark{width:4px;height:4px;border-radius:50%;background:var(--signal);position:absolute;bottom:4px;box-shadow:0 0 8px rgba(232,199,102,.5)}
     .hero{min-height:158px;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 18px 16px;border-color:rgba(255,255,255,.1)}
-    .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,7,12,.95),rgba(7,9,14,.28) 80%),radial-gradient(ellipse at 75% 20%,rgba(30,47,77,.18),transparent 60%);pointer-events:none}
+    .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,7,12,.9),rgba(7,9,14,.5) 78%),radial-gradient(ellipse at 75% 20%,rgba(30,47,77,.2),transparent 60%);pointer-events:none}
     .hero>*{position:relative}.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
     .hero-count{font:500 46px/1 var(--mono);letter-spacing:-.08em;color:#f1f1f2;text-shadow:0 2px 16px #000}
     .hero-name{font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:8px;color:#eee}
@@ -128,7 +129,28 @@
   <input id="photo-file" type="file" accept="image/*" hidden>
   <script src="./assets/anime.min.js"></script>
   <script type="module">
-    import { animate as motionAnimate } from "./assets/motion.mjs";
+    import { animate as free26MotionAnimate } from "./assets/motion.mjs";
+    window.free26MotionAnimate = free26MotionAnimate;
+  </script>
+  <script>
+    // The page still renders from file:// if a browser blocks local ES modules.
+    function motionAnimate(element,keyframes,options={}){
+      if(typeof window.free26MotionAnimate==="function") return window.free26MotionAnimate(element,keyframes,options);
+      if(!element||!element.animate) return Promise.resolve();
+      const first={},last={},transforms=[];
+      Object.keys(keyframes||{}).forEach(key=>{
+        const values=Array.isArray(keyframes[key])?keyframes[key]:[keyframes[key],keyframes[key]];
+        if(key==="x"||key==="y") transforms.push(["translate"+key.toUpperCase(),values]);
+        else if(key==="scale") transforms.push(["scale",values]);
+        else {first[key]=values[0];last[key]=values[values.length-1];}
+      });
+      if(transforms.length){
+        first.transform=transforms.map(x=>x[0]+"("+x[1][0]+(x[0]==="scale"?"": "px")+")").join(" ");
+        last.transform=transforms.map(x=>x[0]+"("+x[1][x[1].length-1]+(x[0]==="scale"?"": "px")+")").join(" ");
+      }
+      try{return element.animate([first,last],{duration:Math.max(150,Number(options.duration||.22)*1000),easing:"ease-out",fill:"both"}).finished.catch(()=>{});}
+      catch(e){return Promise.resolve();}
+    }
 
     const KEY = "free26_v1";
     const START = "2026-11-09";
@@ -154,7 +176,7 @@
     const $ = (s, root=document) => root.querySelector(s);
     const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
     const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+    const uid = () => (typeof crypto!=="undefined"&&crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
     const localISO = (d=new Date()) => { const x=new Date(d); x.setHours(12,0,0,0); return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); };
     const fromISO = (s) => { const a=String(s).split("-").map(Number); return new Date(a[0],a[1]-1,a[2],12); };
     const addDays = (s,n) => { const d=fromISO(s); d.setDate(d.getDate()+n); return localISO(d); };
@@ -201,10 +223,13 @@
     try{ state=migrate(JSON.parse(localStorage.getItem(KEY)||"null")); }catch(e){ state=defaultState(); }
     let view="home", selectedDate=today(), cycleDay=weekKeys[0], collapsed={}, holdTimer=0, customPressTimer=0, dragCycle=null, sheetSubmit=null, sheetResolve=null, toastTimer=0, timerTick=0, reminderShown="";
     const screen=$("#screen"), topbar=$("#topbar"), nav=$("#bottom-nav"), backdrop=$("#sheet-backdrop"), sheetContent=$("#sheet-content");
-    if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+    try{if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});}catch(e){}
     if(!("start" in state.profile)) state.profile.start=START;
 
-    function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+    function save(){
+      try{localStorage.setItem(KEY,JSON.stringify(state));return true;}
+      catch(e){console.warn("free26: сохранение недоступно в этом режиме",e);return false;}
+    }
     function inPeriod(s){ return s>=state.profile.start&&s<=state.profile.end; }
     function periodLength(){ return Math.max(1,diffDays(state.profile.start,state.profile.end)+1); }
     function maxScore(){ return periodLength()*10; }
@@ -382,7 +407,7 @@
         return {n:ds.reduce((a,s)=>a+completedTask(s,"body"),0),m:(state.body.sessions||[]).filter(x=>ds.includes(x.date)).reduce((a,x)=>a+Number(x.minutes||0),0)};
       });
       const weights=(state.body.weights||[]).slice(-8), weightValues=weights.map(x=>Number(x.kg)), weightLabels=weights.map(x=>dateLabel(x.date,{day:"numeric",month:"numeric"}));
-      return '<div class="row between"><div><div class="eyebrow">ТЕЛО</div><h1 class="page-title">Тренировки</h1></div><span class="pill">'+trained+' / '+periodLength()+'</span></div>'+renderStreak("training","ТРЕНИРОВКИ ПОДРЯД","Запланированные дни тела")+
+      return '<div class="row between"><div><div class="eyebrow">ТЕЛО</div><h1 class="page-title">Тренировки</h1></div><span class="pill">'+trained+' / '+periodLength()+'</span></div>'+renderStreak("training","ТРЕНИРОВКИ ПОДРЯД","Запланированные дни тела",ASSET+"bat-mark.jpg")+
         '<section class="card spotlight"><div class="card-head"><div><div class="eyebrow">ATHLETIC SCORE</div><div class="hero-count mono" style="font-size:35px;margin-top:8px">'+trained+'</div><div class="subtle">тренировок за период</div></div><div class="metric-list"><div class="metric"><span>За неделю</span><b>'+data.done+'</b></div><div class="metric"><span>Минуты</span><b>'+data.minutes+'</b></div><div class="metric"><span>Серия</span><b>'+streak.best+' дн.</b></div><div class="metric"><span>План</span><b>'+(data.planned?Math.round(data.done/data.planned*100):0)+'%</b></div></div></div><div class="dots" style="grid-template-columns:repeat(14,1fr);gap:5px">'+points+'</div></section>'+
         '<section class="card"><div class="card-head"><span class="eyebrow">ТРЕНИРОВКИ ПО НЕДЕЛЯМ</span></div>'+barChart(weekTotals.map(x=>x.n),weekTotals.map((x,i)=>"Н"+(i+1)))+'<div class="eyebrow" style="margin-top:12px">МИНУТЫ В НЕДЕЛЮ</div>'+barChart(weekTotals.map(x=>x.m),weekTotals.map((x,i)=>"Н"+(i+1)))+'</section>'+
         '<section class="card"><div class="card-head"><span class="eyebrow">ЖУРНАЛ ТРЕНИРОВОК</span><button class="secondary-btn" data-action="body-session">+ Запись</button></div>'+(data.sessions.length?data.sessions.slice().reverse().map(x=>'<div class="record"><span>'+dateLabel(x.date,{day:"numeric",month:"short"})+(x.notes?" · "+esc(x.notes):"")+'</span><span class="mono">'+x.minutes+' мин</span></div>').join(""):'<div class="subtle">Пока нет записей. Отмечайте задачи в блоке «Тело».</div>')+'</section>'+
@@ -453,7 +478,7 @@
     }
     function renderGod(){
       const note=(state.god.notes||{})[today()]||"", weeks=Array.from({length:8},(_,i)=>{const ws=addDays(weekStart(today()),-(7*(7-i)));return Array.from({length:7},(_,j)=>addDays(ws,j)).reduce((a,s)=>a+completedTask(s,"god"),0);});
-      return '<div><div class="eyebrow">ДУХОВНАЯ СИЛА</div><h1 class="page-title">Живу во Христе</h1></div>'+renderStreak("god","ЖИВУ БЕЗ ВРЕДНЫХ ПРИВЫЧЕК И ВО ХРИСТЕ","Библия и молитва")+
+      return '<div><div class="eyebrow">ДУХОВНАЯ СИЛА</div><h1 class="page-title">Живу во Христе</h1></div>'+renderStreak("god","ЖИВУ БЕЗ ВРЕДНЫХ ПРИВЫЧЕК И ВО ХРИСТЕ","Библия и молитва",ASSET+"batman.jpg")+
         '<section class="card"><div class="card-head"><span class="eyebrow">СЕГОДНЯ · 23:00</span><span class="pill">'+(completedTask(today(),"god")?"Выполнено":"Библия и молитва")+'</span></div><div class="field"><label for="god-note">Заметка · до 500 символов</label><textarea id="god-note" maxlength="500" placeholder="Что прочитал / за что молился">'+esc(note)+'</textarea></div><div class="row between" style="margin-top:12px"><span class="subtle">Сохранение происходит автоматически</span><button class="secondary-btn" data-action="god-done">'+(completedTask(today(),"god")?"Снять отметку":"Отметить")+'</button></div></section>'+
         '<section class="card"><div class="card-head"><span class="eyebrow">КАЛЕНДАРЬ БИБЛИИ</span><span class="mono subtle">'+dateLabel(selectedDate,{month:"long",year:"numeric"})+'</span></div>'+monthCalendar()+'</section>'+
         '<section class="card"><div class="card-head"><span class="eyebrow">БИБЛИЯ ПО НЕДЕЛЯМ</span></div>'+barChart(weeks,weeks.map((x,i)=>"Н"+(i+1)))+'</section>'+
@@ -743,7 +768,7 @@
       }catch(e){toast("Не удалось прочитать JSON");}
     }
     function resetAll(){
-      state=defaultState();localStorage.setItem(KEY,JSON.stringify(state));selectedDate=today();view="home";closeSheet();render();toast("Данные сброшены");
+      state=defaultState();save();selectedDate=today();view="home";closeSheet();render();toast("Данные сброшены");
     }
     function startHold(el,action){
       clearTimeout(holdTimer);el.classList.add("holding");
