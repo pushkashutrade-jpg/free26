@@ -10,15 +10,15 @@
   <meta name="apple-mobile-web-app-title" content="free26">
   <meta name="description" content="Личный дневник челленджа free26">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" type="image/png" href="./icon-192.png">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v2.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v2.png">
   <title>free26</title>
   <style>
     :root{color-scheme:dark;--bg:#08080A;--s1:#111114;--s2:#18181C;--s3:#212127;--line:rgba(255,255,255,.07);--text:#EDEDEF;--dim:#8B8B94;--faint:#55555D;--navy:#1E2F4D;--glow:#3B5A8F;--signal:#E8C766;--ok:#7FB89A;--danger:#B5504F;--mono:ui-monospace,"SF Mono",Menlo,monospace}
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
     html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none;scroll-behavior:smooth}
-    body{min-height:100dvh}
-    input,textarea,select{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;font:inherit;font-size:16px}
+    body{min-height:100dvh;touch-action:manipulation}
+    input,textarea,select{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;font:inherit;font-size:16px;touch-action:auto}
     button{font:inherit;color:inherit;border:0;cursor:pointer;min-height:44px}
     button:disabled{opacity:.38;cursor:default}
     .app{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 10px) 18px calc(94px + env(safe-area-inset-bottom));max-width:620px;margin:0 auto}
@@ -97,7 +97,7 @@
     .segmented{display:flex;gap:6px;overflow:auto}.segmented button{min-height:44px;padding:0 13px;border-radius:999px;background:var(--s2);color:var(--dim);font-size:12px;white-space:nowrap}.segmented button.active{background:rgba(232,199,102,.12);color:var(--signal);outline:1px solid rgba(232,199,102,.24)}
     .goal-row{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}.goal-row .progress{grid-column:1/-1}
     .photo-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.photo-choice{height:72px;border-radius:13px;background-size:cover;background-position:center;border:2px solid transparent}.photo-choice.active{border-color:var(--signal)}
-    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+    .sheet-backdrop{position:fixed;inset:0;background:transparent;z-index:20;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
     .sheet-backdrop.open{opacity:1;pointer-events:auto}.sheet{width:100%;max-width:620px;max-height:90dvh;overflow:auto;background:#141418;border:1px solid var(--line);border-radius:28px 28px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
     .sheet-backdrop.open .sheet{transform:translateY(0)}.grabber{width:42px;height:4px;border-radius:9px;background:#45454b;margin:0 auto 16px}.sheet-title{font-size:19px;font-weight:650;margin:0 0 16px}.sheet-actions{display:flex;gap:9px;margin-top:16px}.sheet-actions>*{flex:1}
     .toast{position:fixed;z-index:40;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#222228;border:1px solid var(--line);padding:11px 16px;border-radius:999px;font-size:13px;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
@@ -493,10 +493,19 @@
         {name:"Духовная сила",value:god,goal:Number(gd.god||0),unit:"дн."}
       ];
     }
+    function syncPhotoChoices(){
+      const container=$(".photo-options");if(!container)return;
+      const isUploaded=!!(state.profile.photo&&state.profile.photo.startsWith("data:"));
+      let uploaded=container.querySelector(".uploaded-photo");
+      if(isUploaded&&!uploaded){uploaded=document.createElement("div");uploaded.className="photo-choice uploaded-photo";uploaded.setAttribute("role","img");uploaded.setAttribute("aria-label","Загруженное фото");container.prepend(uploaded);}
+      if(isUploaded)uploaded.style.backgroundImage='url("'+state.profile.photo+'")';else if(uploaded)uploaded.remove();
+      $$(".photo-choice",container).forEach(choice=>choice.classList.toggle("active",isUploaded?choice===uploaded:choice.dataset.photo===state.profile.photo));
+    }
     function renderProfile(){
       const g=state.profile.goals||{}, tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"по устройству";
       const photos=[["batman.jpg","По умолчанию"],["signal.jpg","Сигнал"],["bat-mark.jpg","Знак"],["portrait.jpg","Портрет"]];
-      const photoHtml=photos.map(p=>'<button type="button" class="photo-choice '+(state.profile.photo===p[0]?"active":"")+'" data-action="photo-select" data-photo="'+p[0]+'" title="'+p[1]+'" style="background-image:linear-gradient(0deg,rgba(0,0,0,.18),transparent),url(\''+ASSET+p[0]+'\')"></button>').join("");
+      const uploadedPhoto=state.profile.photo&&state.profile.photo.startsWith("data:")?'<div class="photo-choice active uploaded-photo" role="img" aria-label="Загруженное фото" style="background-image:url(\''+state.profile.photo+'\')"></div>':"";
+      const photoHtml=uploadedPhoto+photos.map(p=>'<button type="button" class="photo-choice '+(state.profile.photo===p[0]?"active":"")+'" data-action="photo-select" data-photo="'+p[0]+'" title="'+p[1]+'" style="background-image:linear-gradient(0deg,rgba(0,0,0,.18),transparent),url(\''+ASSET+p[0]+'\')"></button>').join("");
       const goals=goalsProgress(), activeGoals=goals.filter(x=>x.goal>0);
       const overall=activeGoals.length?Math.round(activeGoals.reduce((a,x)=>a+clamp(x.value/x.goal*100,0,100),0)/activeGoals.length):0;
       const goalHtml=goals.map(x=>'<div class="goal-row"><span class="subtle">'+esc(x.name)+'</span><span class="mono">'+(x.unit==="₽"?moneyFmt(x.value):x.value+" "+x.unit)+' / '+(x.goal?(x.unit==="₽"?moneyFmt(x.goal):x.goal+" "+x.unit):"цель не задана")+'</span>'+(x.goal?pctBar(x.value,x.goal):'<div class="subtle">Цель не задана</div>')+'</div>').join("");
@@ -540,17 +549,7 @@
       nav.innerHTML=tabs.map(k=>'<button class="nav-btn '+(view===k?"active":"")+'" data-nav="'+k+'">'+icons[k]+'<span>'+tabLabels[k]+'</span></button>').join("");
     }
     function animateIn(){
-      const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if(!reduced&&typeof motionAnimate==="function") motionAnimate(screen,{opacity:[0,1],y:[7,0]},{duration:.22,ease:"easeOut"});
-      if(!reduced&&window.anime){
-        anime({targets:".card",opacity:[0,1],translateY:[8,0],delay:anime.stagger(35),duration:250,easing:"easeOutQuad"});
-        $$(".fill[data-value]").forEach(el=>{const n=Number(el.dataset.value||0);anime({targets:el,width:[0,n+"%"],duration:360,easing:"easeOutCubic"});});
-        anime({targets:".dot.on",scale:[.45,1],delay:anime.stagger(18),duration:220,easing:"easeOutBack"});
-        $$("[data-counter]").forEach(el=>{
-          const end=Number(el.dataset.counter||0), obj={value:0};
-          anime({targets:obj,value:end,round:1,duration:340,easing:"easeOutCubic",update:()=>{el.textContent=Number(obj.value).toLocaleString("ru-RU");}});
-        });
-      }else $$(".fill[data-value]").forEach(el=>el.style.width=(el.dataset.value||0)+"%");
+      $$(".fill[data-value]").forEach(el=>el.style.width=(el.dataset.value||0)+"%");
     }
     function toast(message){
       const t=$("#toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
@@ -567,7 +566,6 @@
       sheetSubmit=submit;backdrop.classList.add("open");
       if(typeof motionAnimate==="function"&&!matchMedia("(prefers-reduced-motion: reduce)").matches) motionAnimate($("#sheet"),{y:["30px","0px"]},{duration:.26,ease:"easeOut"});
       $("#sheet-form").addEventListener("submit",async e=>{e.preventDefault();if(sheetSubmit) await sheetSubmit(new FormData(e.currentTarget),e.currentTarget);});
-      setTimeout(()=>{const f=$("input:not([type=hidden]),select,textarea",sheetContent);if(f)f.focus({preventScroll:true});},100);
     }
     function closeSheet(value){
       backdrop.classList.remove("open");
@@ -793,6 +791,8 @@
       });
     }
     function listen(){
+      document.addEventListener("contextmenu",e=>{if(e.target.closest(".streak-card,[data-cycle-row]"))e.preventDefault();});
+      document.addEventListener("selectstart",e=>{if(!e.target.closest("input,textarea,select"))e.preventDefault();});
       nav.addEventListener("click",e=>{const b=e.target.closest("[data-nav]");if(b)navTo(b.dataset.nav);});
       document.addEventListener("click",async e=>{
         const b=e.target.closest("[data-action]");if(!b)return;
@@ -852,7 +852,7 @@
         }
         if(a==="withdraw"){const id=b.dataset.saving;closeSheet();openWithdraw(id);return;}
         if(a==="undo-income"){const op=state.money.ops.find(x=>x.id===b.dataset.id);if(op)await saveIncomeUndo(op);return;}
-        if(a==="photo-select"){state.profile.photo=b.dataset.photo;save();render();return;}
+        if(a==="photo-select"){state.profile.photo=b.dataset.photo;save();syncPhotoChoices();return;}
         if(a==="photo-upload"){$("#photo-file").click();return;}
         if(a==="toggle-past"){state.profile.allowPastEdit=!state.profile.allowPastEdit;save();render();return;}
         if(a==="save-streak-goal"){const input=$('[data-streak-goal="'+b.dataset.streak+'"]');state.streaks[b.dataset.streak].goal=Math.max(0,Number(input.value||0));save();render();toast("Цель серии сохранена");return;}
@@ -878,7 +878,7 @@
           const canvas=document.createElement("canvas"),scale=Math.min(1,1200/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
           const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,canvas.width,canvas.height);
           let q=.82,data=canvas.toDataURL("image/jpeg",q);while(data.length>800*1024&&q>.4){q-=.08;data=canvas.toDataURL("image/jpeg",q);}
-          if(data.length>800*1024)throw new Error("large");state.profile.photo=data;save();render();URL.revokeObjectURL(url);
+          if(data.length>800*1024)throw new Error("large");state.profile.photo=data;save();syncPhotoChoices();URL.revokeObjectURL(url);
         }catch(err){toast("Фото не удалось сжать до 800 КБ");}e.target.value="";
       });
       document.addEventListener("pointerdown",e=>{
