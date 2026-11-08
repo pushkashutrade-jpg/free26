@@ -1,0 +1,943 @@
+
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#08080A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="free26">
+  <meta name="description" content="Личный дневник челленджа free26">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <title>free26</title>
+  <style>
+    :root{color-scheme:dark;--bg:#08080A;--s1:#111114;--s2:#18181C;--s3:#212127;--line:rgba(255,255,255,.07);--text:#EDEDEF;--dim:#8B8B94;--faint:#55555D;--navy:#1E2F4D;--glow:#3B5A8F;--signal:#E8C766;--ok:#7FB89A;--danger:#B5504F;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none;scroll-behavior:smooth}
+    body{min-height:100dvh}
+    input,textarea,select{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;font:inherit;font-size:16px}
+    button{font:inherit;color:inherit;border:0;cursor:pointer;min-height:44px}
+    button:disabled{opacity:.38;cursor:default}
+    .app{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 10px) 18px calc(94px + env(safe-area-inset-bottom));max-width:620px;margin:0 auto}
+    .topbar{display:flex;align-items:center;justify-content:space-between;min-height:54px;margin-bottom:14px}
+    .brand{display:flex;flex-direction:column;gap:4px}.brand-title{font-size:20px;letter-spacing:.02em;font-weight:650}.brand-sub{font-size:12px;color:var(--dim)}
+    .top-actions{display:flex;gap:8px}.icon-btn{width:44px;height:44px;border-radius:16px;background:var(--s1);border:1px solid var(--line);display:grid;place-items:center;color:var(--dim)}
+    .icon-btn svg,.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .page{display:flex;flex-direction:column;gap:14px;min-height:55vh}
+    .page-title{font-size:24px;font-weight:650;letter-spacing:-.03em;margin:3px 0 0}
+    .subtle{font-size:13px;color:var(--dim);line-height:1.45}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+    .card{background:var(--s1);border:1px solid var(--line);border-radius:24px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+    .card.spotlight:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(59,90,143,.13),transparent 70%);opacity:0;transition:opacity .2s}
+    .card.spotlight:hover:after,.card.spotlight.touching:after{opacity:1}
+    .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .eyebrow{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:650}
+    .section-label{font-size:14px;font-weight:650;letter-spacing:.07em}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;background:var(--s2);color:var(--dim);font-size:11px;border:1px solid var(--line)}
+    .week-card{border-radius:28px;background:linear-gradient(145deg,#17181d,#111114);padding:14px 12px}
+    .week-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 9px}.week-head button{width:44px;height:44px;background:transparent;color:var(--dim);border-radius:50%;font-size:19px}
+    .week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+    .day-btn{min-height:58px;border-radius:18px;background:transparent;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;color:var(--dim);position:relative}
+    .day-btn .dow{font-size:10px;color:var(--faint)}.day-btn .day-num{font-family:var(--mono);font-size:13px;color:var(--text)}
+    .day-btn.selected{background:rgba(232,199,102,.09);outline:1px solid rgba(232,199,102,.3)}
+    .day-btn.today .day-num{width:24px;height:24px;border-radius:50%;background:#f4f4f5;color:#111;display:grid;place-items:center}
+    .day-mark{width:4px;height:4px;border-radius:50%;background:var(--signal);position:absolute;bottom:4px;box-shadow:0 0 8px rgba(232,199,102,.5)}
+    .hero{min-height:158px;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 18px 16px;border-color:rgba(255,255,255,.1)}
+    .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,7,12,.95),rgba(7,9,14,.28) 80%),radial-gradient(ellipse at 75% 20%,rgba(30,47,77,.18),transparent 60%);pointer-events:none}
+    .hero>*{position:relative}.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .hero-count{font:500 46px/1 var(--mono);letter-spacing:-.08em;color:#f1f1f2;text-shadow:0 2px 16px #000}
+    .hero-name{font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:8px;color:#eee}
+    .hero-foot{display:flex;align-items:center;gap:14px;margin-top:13px}.hero-foot .subtle{color:#c0c1c5}
+    .progress{height:6px;background:#303137;border-radius:99px;overflow:hidden}
+    .progress.large{height:10px;background:rgba(255,255,255,.12)}
+    .fill{height:100%;width:0;background:var(--signal);border-radius:99px;box-shadow:0 0 11px rgba(232,199,102,.33)}
+    .fill.cool{background:var(--glow);box-shadow:0 0 10px rgba(59,90,143,.38)}
+    .day-score{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+    .score-number{font:500 28px var(--mono);letter-spacing:-.08em}.score-number small{font-size:12px;color:var(--dim);letter-spacing:0}
+    .dots{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:11px 0 13px}
+    .dot{width:100%;aspect-ratio:1;border-radius:50%;background:#2a2a30;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}
+    .dot.on{background:var(--signal);box-shadow:0 0 9px rgba(232,199,102,.37)}
+    .period-row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:11px;color:var(--dim);margin-bottom:8px}
+    .block{padding:0;overflow:hidden}.block-header{width:100%;min-height:68px;background:transparent;text-align:left;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:3px;align-items:center}
+    .block-title{font-size:12px;letter-spacing:.1em;font-weight:700}.block-time{font:11px var(--mono);color:var(--dim);grid-column:1}
+    .block-count{font:11px var(--mono);color:var(--dim);grid-column:2;grid-row:1/3}
+    .block-body{padding:0 14px 12px}.block.current{border-color:rgba(59,90,143,.75);box-shadow:0 0 22px rgba(59,90,143,.09)}
+    .block.past{opacity:.72}.task-row{display:flex;align-items:center;gap:11px;min-height:48px;padding:6px 2px;border-top:1px solid rgba(255,255,255,.045)}
+    .check{width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:transparent;display:grid;place-items:center;color:#151515;transition:transform .18s;position:relative}
+    .check:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--s3);border:1px solid rgba(255,255,255,.1);transition:background .18s,border-color .18s,box-shadow .18s}
+    .check.done:before{background:var(--signal);border-color:var(--signal);box-shadow:0 0 12px rgba(232,199,102,.2)}
+    .check svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;position:relative;z-index:1}
+    .task-copy{min-width:0;flex:1}.task-title{font-size:14px;line-height:1.25}.task-details{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.35}
+    .task-more{font-size:11px;color:var(--dim);background:none;padding:8px;min-width:44px;min-height:44px}.task-remove{color:var(--danger)}
+    .empty-slot{font-size:12px;color:var(--faint);padding:8px 3px;border-top:1px solid rgba(255,255,255,.04)}
+    .primary-btn,.secondary-btn,.danger-btn{min-height:48px;border-radius:999px;padding:0 18px;font-weight:620;font-size:14px}
+    .primary-btn{background:var(--signal);color:#171513;box-shadow:0 0 17px rgba(232,199,102,.12);position:relative;overflow:hidden}
+    .primary-btn.shimmer:after{content:"";position:absolute;inset:-50%;background:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.25) 50%,transparent 62%);transform:translateX(-75%);animation:shimmer 5s ease-in-out infinite}
+    @keyframes shimmer{0%,72%{transform:translateX(-75%)}100%{transform:translateX(75%)}}
+    .secondary-btn{background:var(--s2);border:1px solid var(--line)}.danger-btn{background:rgba(181,80,79,.12);border:1px solid rgba(181,80,79,.26);color:#d88986}
+    .full{width:100%}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:var(--s2);border:1px solid var(--line);padding:13px;border-radius:17px}.stat-value{font:19px var(--mono);margin-top:6px}
+    .chart{width:100%;height:112px;overflow:visible}.chart text{fill:var(--faint);font:9px var(--mono)}.chart .gridline{stroke:rgba(255,255,255,.065);stroke-width:1}.chart .line{stroke:var(--signal);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}.chart .area{fill:rgba(232,199,102,.07)}
+    .bar-chart{display:flex;align-items:end;gap:10px;height:130px;padding:12px 2px 0}.bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:7px}.bar{width:min(24px,65%);min-height:3px;background:linear-gradient(0deg,#806c34,var(--signal));border-radius:8px 8px 3px 3px;box-shadow:0 0 10px rgba(232,199,102,.12)}.bar-label{font:9px var(--mono);color:var(--faint)}
+    .metric-list{display:grid;gap:10px}.metric{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--dim)}.metric b{color:var(--text);font:12px var(--mono);font-weight:500}
+    .pixel{display:grid;grid-template-columns:repeat(6,12px);gap:4px;width:max-content;margin:4px auto 12px}.pixel i{width:12px;height:12px;background:#25252c;border-radius:2px}.pixel i.lit{background:var(--signal);box-shadow:0 0 8px rgba(232,199,102,.35)}
+    .level{text-align:center;font-size:20px;font-weight:650}.xp-text{text-align:center;color:var(--dim);font:12px var(--mono);margin:8px 0 12px}
+    .timer{text-align:center;font:42px var(--mono);letter-spacing:-.07em;margin:12px 0}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal-day{aspect-ratio:1;display:grid;place-items:center;border-radius:10px;background:var(--s2);font:10px var(--mono);color:var(--dim)}.cal-day.has{background:rgba(232,199,102,.18);color:var(--signal)}
+    .saving-strip{display:flex;gap:11px;overflow:auto;scroll-snap-type:x mandatory;padding:2px 1px 8px;margin:0 -2px}.saving-card{scroll-snap-align:start;min-width:82%;height:155px;border-radius:24px;padding:17px;background:linear-gradient(135deg,#1e2f4d,#25262b 62%,#2e2a21);border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+    .saving-card:after{content:"";position:absolute;right:-35px;top:-55px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(255,255,255,.12);box-shadow:0 0 0 18px rgba(255,255,255,.025),0 0 0 38px rgba(255,255,255,.018)}
+    .saving-card>*{position:relative;z-index:1}.saving-name{font-size:11px;letter-spacing:.12em;color:#d0d3dc}.saving-balance{font:27px var(--mono);letter-spacing:-.07em}.saving-foot{display:flex;justify-content:space-between;align-items:center;color:#c0c3cb;font-size:11px}
+    .distribution{display:flex;height:7px;border-radius:99px;overflow:hidden;background:#2d2d33;gap:2px}.distribution i{height:100%;background:var(--signal)}.distribution i:nth-child(2n){background:#586a88}
+    .op-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:13px}.op-amount{font:13px var(--mono)}.positive{color:var(--ok)}.negative{color:#d28b85}
+    .form-grid{display:grid;gap:12px}.field{display:grid;gap:7px}.field label{font-size:12px;color:var(--dim)}.field input,.field textarea,.field select{width:100%;min-height:48px;border-radius:14px;background:var(--s2);border:1px solid var(--line);padding:12px 14px;color:var(--text);outline:none}
+    .field textarea{min-height:82px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--glow)}
+    .inline-field{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:center}.toggle{width:52px;height:44px;border-radius:99px;background:transparent;padding:8px 3px;transition:background .2s;position:relative}.toggle:before{content:"";position:absolute;inset:8px 2px;background:#34343b;border-radius:99px;transition:background .2s}.toggle i{width:22px;height:22px;border-radius:50%;background:#ddd;display:block;position:relative;transition:transform .22s}.toggle.on:before{background:#746337}.toggle.on i{transform:translateX(20px);background:var(--signal)}
+    .segmented{display:flex;gap:6px;overflow:auto}.segmented button{min-height:44px;padding:0 13px;border-radius:999px;background:var(--s2);color:var(--dim);font-size:12px;white-space:nowrap}.segmented button.active{background:rgba(232,199,102,.12);color:var(--signal);outline:1px solid rgba(232,199,102,.24)}
+    .goal-row{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}.goal-row .progress{grid-column:1/-1}
+    .photo-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.photo-choice{height:72px;border-radius:13px;background-size:cover;background-position:center;border:2px solid transparent}.photo-choice.active{border-color:var(--signal)}
+    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+    .sheet-backdrop.open{opacity:1;pointer-events:auto}.sheet{width:100%;max-width:620px;max-height:90dvh;overflow:auto;background:#141418;border:1px solid var(--line);border-radius:28px 28px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+    .sheet-backdrop.open .sheet{transform:translateY(0)}.grabber{width:42px;height:4px;border-radius:9px;background:#45454b;margin:0 auto 16px}.sheet-title{font-size:19px;font-weight:650;margin:0 0 16px}.sheet-actions{display:flex;gap:9px;margin-top:16px}.sheet-actions>*{flex:1}
+    .toast{position:fixed;z-index:40;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#222228;border:1px solid var(--line);padding:11px 16px;border-radius:999px;font-size:13px;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .bottom-nav{position:fixed;z-index:10;left:0;right:0;bottom:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:rgba(11,11,14,.91);backdrop-filter:blur(18px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr)}
+    .nav-btn{min-height:54px;background:transparent;color:#606068;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:16px}
+    .nav-btn span{font-size:9px;color:#696971;opacity:.65}.nav-btn.active{color:var(--signal)}.nav-btn.active span{opacity:1;color:var(--signal)}
+    .record{border-top:1px solid var(--line);padding:10px 0;font-size:12px;display:flex;justify-content:space-between;gap:12px;color:var(--dim)}
+    .week-dots{display:flex;gap:5px;align-items:center}.week-dots i{width:8px;height:8px;border-radius:50%;background:#33343b}.week-dots i.done{background:var(--signal);box-shadow:0 0 8px rgba(232,199,102,.35)}
+    .info{border-left:2px solid var(--navy);padding:2px 0 2px 11px;color:var(--dim);font-size:12px;line-height:1.45}
+    .hold-ring{position:absolute;inset:5px;border:2px solid transparent;border-radius:20px;pointer-events:none}
+    .main-period-fill{animation:soft-breathe 4.2s ease-in-out infinite alternate}
+    @keyframes soft-breathe{from{box-shadow:0 0 8px rgba(232,199,102,.22)}to{box-shadow:0 0 13px rgba(232,199,102,.38)}}
+    .streak-card.holding .hold-ring{border-color:var(--signal);animation:hold 4s linear forwards}
+    @keyframes hold{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+    .hidden{display:none!important}.center{text-align:center}.muted{color:var(--dim)}.spacer{height:2px}
+    @media(min-width:540px){.app{padding-left:26px;padding-right:26px}.saving-card{min-width:300px}.page{gap:16px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar" id="topbar"></header>
+    <main id="screen" class="page" aria-live="polite"></main>
+  </div>
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Разделы"></nav>
+  <div class="sheet-backdrop" id="sheet-backdrop"><section class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grabber"></div><div id="sheet-content"></div></section></div>
+  <div class="toast" id="toast" role="status"></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <input id="photo-file" type="file" accept="image/*" hidden>
+  <script src="./assets/anime.min.js"></script>
+  <script type="module">
+    import { animate as motionAnimate } from "./assets/motion.mjs";
+
+    const KEY = "free26_v1";
+    const START = "2026-11-09";
+    const END = "2027-01-31";
+    const ASSET = "./assets/";
+    const blocks = { daily:"ДЕЛА ДНЯ", work:"РАБОТА", body:"ТЕЛО", skill:"НАВЫК", recovery:"ВОССТАНОВЛЕНИЕ", god:"ДУХОВНАЯ СИЛА" };
+    const times = { work:"09:00–18:00", body:"19:00–20:00", skill:"20:10–20:50", recovery:"21:00–21:30", god:"23:00" };
+    const weekKeys = ["mon","tue","wed","thu","fri","sat","sun"];
+    const weekNames = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+    const tabs = ["home","body","money","skill","god"];
+    const tabLabels = {home:"Главная",body:"Тело",money:"Деньги",skill:"Навык",god:"God"};
+    const icons = {
+      home:'<svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></svg>',
+      body:'<svg viewBox="0 0 24 24"><path d="M6 7v10M3 9v6m15-8v10m3-8v6M6 12h12"/></svg>',
+      money:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h3"/></svg>',
+      skill:'<svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>',
+      god:'<svg viewBox="0 0 24 24"><path d="M12 3v18M6 8h12M8 5h8M8 19h8"/></svg>',
+      cycle:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3m2 0h3"/></svg>',
+      profile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="9" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/></svg>',
+      back:'<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>'
+    };
+
+    const $ = (s, root=document) => root.querySelector(s);
+    const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+    const localISO = (d=new Date()) => { const x=new Date(d); x.setHours(12,0,0,0); return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); };
+    const fromISO = (s) => { const a=String(s).split("-").map(Number); return new Date(a[0],a[1]-1,a[2],12); };
+    const addDays = (s,n) => { const d=fromISO(s); d.setDate(d.getDate()+n); return localISO(d); };
+    const diffDays = (a,b) => Math.round((fromISO(b)-fromISO(a))/86400000);
+    const dateLabel = (s, opts={day:"numeric",month:"short"}) => fromISO(s).toLocaleDateString("ru-RU",opts);
+    const dayIndex = (s) => (fromISO(s).getDay()+6)%7;
+    const weekStart = (s) => addDays(s,-dayIndex(s));
+    const isWeekday = (s) => dayIndex(s)<5;
+    const moneyFmt = (n) => Number(n||0).toLocaleString("ru-RU",{minimumFractionDigits:0,maximumFractionDigits:2})+" ₽";
+    const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
+    const today = () => localISO();
+    const randomName = () => "free26-backup-" + today() + ".json";
+    const defaultCycle = () => {
+      const cycle=Object.fromEntries(weekKeys.map(k=>[k,{body:[],skill:[],recovery:[]}]));
+      cycle.mon.body=[{id:"cycle-mon-body",title:"Силовая",details:""}];
+      cycle.mon.skill=[{id:"cycle-mon-skill",title:"Книга",details:""}];
+      cycle.mon.recovery=[{id:"cycle-mon-recovery",title:"Растяжка",details:""}];
+      return cycle;
+    };
+    const defaultState = () => ({
+      version:1,
+      profile:{start:START,end:END,thresholdPct:80,goals:{body:84,money:0,skill:2400,god:84},skillName:"Английский",photo:"batman.jpg",allowPastEdit:false},
+      cycle:defaultCycle(),days:{},streaks:{isolation:{goal:0,best:0,deleted:false},god:{goal:0,best:0,deleted:false},training:{goal:0,best:0,deleted:false}},
+      body:{weights:[],sessions:[]},skill:{xp:0,sessions:[],timer:{running:false,startedAt:0,elapsed:0}},money:{savings:[],ops:[],goal:0},god:{notes:{}},ui:{}
+    });
+    function migrate(raw){
+      const base=defaultState();
+      if(!raw||typeof raw!=="object") return base;
+      if(Number(raw.version||0)<1) raw=Object.assign({},raw,{version:1});
+      const merged=Object.assign({},base,raw);
+      merged.profile=Object.assign({},base.profile,raw.profile||{});
+      merged.profile.goals=Object.assign({},base.profile.goals,(raw.profile||{}).goals||{});
+      merged.cycle=Object.assign(defaultCycle(),raw.cycle||{});
+      weekKeys.forEach(k=>merged.cycle[k]=Object.assign({body:[],skill:[],recovery:[]},merged.cycle[k]||{}));
+      merged.streaks=Object.assign({},base.streaks,raw.streaks||{});
+      ["isolation","god","training"].forEach(k=>merged.streaks[k]=Object.assign({},base.streaks[k],merged.streaks[k]||{}));
+      merged.body=Object.assign({},base.body,raw.body||{}); merged.skill=Object.assign({},base.skill,raw.skill||{});
+      merged.skill.timer=Object.assign({},base.skill.timer,(raw.skill||{}).timer||{});
+      merged.money=Object.assign({},base.money,raw.money||{}); merged.god=Object.assign({},base.god,raw.god||{});
+      merged.days=raw.days||{}; merged.ui=raw.ui||{};
+      return merged;
+    }
+    let state;
+    try{ state=migrate(JSON.parse(localStorage.getItem(KEY)||"null")); }catch(e){ state=defaultState(); }
+    let view="home", selectedDate=today(), cycleDay=weekKeys[0], collapsed={}, holdTimer=0, customPressTimer=0, dragCycle=null, sheetSubmit=null, sheetResolve=null, toastTimer=0, timerTick=0, reminderShown="";
+    const screen=$("#screen"), topbar=$("#topbar"), nav=$("#bottom-nav"), backdrop=$("#sheet-backdrop"), sheetContent=$("#sheet-content");
+    if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+    if(!("start" in state.profile)) state.profile.start=START;
+
+    function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+    function inPeriod(s){ return s>=state.profile.start&&s<=state.profile.end; }
+    function periodLength(){ return Math.max(1,diffDays(state.profile.start,state.profile.end)+1); }
+    function maxScore(){ return periodLength()*10; }
+    function goalScore(){ return Math.round(maxScore()*Number(state.profile.thresholdPct||80)/100); }
+    function dayNumber(s){ return inPeriod(s)?diffDays(state.profile.start,s)+1:0; }
+    function cycleFor(s){ return state.cycle[weekKeys[dayIndex(s)]]||{body:[],skill:[],recovery:[]}; }
+    function task(title,block,extra={}){ return Object.assign({id:uid(),title,block,details:"",kind:"cycle"},extra); }
+    function buildSnapshot(s,old){
+      const previousDone=(old&&old.done)||{};
+      const custom=(old&&old.snapshot||[]).filter(t=>t.kind==="custom");
+      const fixed=[
+        task("Изоляция от всех","daily",{id:"fixed-isolation-"+s,kind:"fixed"}),
+        task("Питание на сушку","recovery",{id:"fixed-food-"+s,kind:"fixed"}),
+        task("Библия","god",{id:"fixed-bible-"+s,kind:"fixed"})
+      ];
+      const work=isWeekday(s)?[
+        task("350 строк — сборка товаров","work",{id:"work-lines-"+s,kind:"work"}),
+        task("2 загруженные машины","work",{id:"work-trucks-"+s,kind:"work"})
+      ]:[];
+      const cycles=[...cycleFor(s).body.map(t=>Object.assign({},t,{block:"body",kind:"cycle"})),...cycleFor(s).skill.map(t=>Object.assign({},t,{block:"skill",kind:"cycle"})),...cycleFor(s).recovery.map(t=>Object.assign({},t,{block:"recovery",kind:"cycle"}))];
+      const capacity=Math.max(0,10-fixed.length-work.length);
+      const includedCycles=cycles.slice(0,capacity);
+      const includedCustom=custom.slice(0,Math.max(0,capacity-includedCycles.length));
+      const trimmed=[fixed[0],...work,...includedCycles,...includedCustom,fixed[1],fixed[2]];
+      return {snapshot:trimmed,done:Object.fromEntries(trimmed.filter(t=>previousDone[t.id]).map(t=>[t.id,true])),closed:!!(old&&old.closed),score:0};
+    }
+    function getDay(s,create=true){
+      if(!state.days[s]&&create&&inPeriod(s)) state.days[s]=buildSnapshot(s);
+      if(!state.days[s]) return {snapshot:[],done:{},closed:s<today(),score:0};
+      return state.days[s];
+    }
+    function syncDay(s){
+      const d=getDay(s,false); if(!d) return;
+      if(!d.snapshot||!d.done) return;
+      d.score=Object.keys(d.done).filter(id=>d.snapshot.some(t=>t.id===id)).length;
+      if(s<today()) d.closed=true;
+    }
+    function closeMissedDays(){
+      if(!state.profile.start||!state.profile.end) return;
+      const last= today()>state.profile.end?state.profile.end:today();
+      if(last<state.profile.start) return;
+      for(let s=state.profile.start;s<=last;s=addDays(s,1)){
+        if(!state.days[s]) state.days[s]=buildSnapshot(s);
+        if(s<today()){ state.days[s].closed=true; syncDay(s); }
+      }
+    }
+    function refreshOpenDays(){
+      const now=today();
+      Object.keys(state.days).forEach(s=>{
+        if(s>=now&&inPeriod(s)&&!state.days[s].closed){
+          const old=state.days[s], fresh=buildSnapshot(s,old);
+          fresh.custom=(old.snapshot||[]).filter(t=>t.kind==="custom");
+          state.days[s]=fresh;
+        }
+      });
+      if(inPeriod(now)&&!state.days[now]) state.days[now]=buildSnapshot(now);
+    }
+    function scoreOf(s){ const d=getDay(s,false); return d?Object.keys(d.done||{}).filter(id=>(d.snapshot||[]).some(t=>t.id===id)).length:0; }
+    function allScores(){ return Object.keys(state.days).filter(inPeriod).reduce((n,s)=>n+scoreOf(s),0); }
+    function completedTask(s,block){ const d=getDay(s,false); return d?(d.snapshot||[]).filter(t=>t.block===block&&d.done[t.id]).length:0; }
+    function plannedTask(s,block){ const d=getDay(s,false); return d?(d.snapshot||[]).filter(t=>t.block===block).length:0; }
+    function currentStreak(type){
+      const end= today()>state.profile.end?state.profile.end:today();
+      if(end<state.profile.start) return {count:0,best:Number(state.streaks[type].best||0),week:[]};
+      let count=0,best=Number(state.streaks[type].best||0),run=0,lastDone=false;
+      const reset=state.streaks[type].manualReset;
+      if(type!=="training"){
+        const first=reset&&reset>=state.profile.start?addDays(reset,1):state.profile.start;
+        count=first<=end?diffDays(first,end)+1:0;
+        best=Math.max(best,count);state.streaks[type].best=best;
+        const ws=weekStart(end),title=type==="god"?"Библия":"Изоляция от всех";
+        const week=Array.from({length:7},(_,i)=>{const s=addDays(ws,i),d=getDay(s,false);return {date:s,done:(d.snapshot||[]).some(t=>t.title===title&&d.done[t.id])};});
+        return {count,best,week};
+      }
+      const first=reset&&reset>=state.profile.start?addDays(reset,1):state.profile.start;
+      for(let s=first;s<=end;s=addDays(s,1)){
+        const d=getDay(s,false); if(!d) continue;
+        let planned=true,done=false;
+        if(type==="training"){ planned=plannedTask(s,"body")>0; done=completedTask(s,"body")>0; }
+        else { const id=type==="isolation"?"Изоляция от всех":"Библия"; done=(d.snapshot||[]).some(t=>t.title===id&&d.done[t.id]); }
+        const isPendingToday=s===today()&&!d.closed;
+        if(type==="training"&&!planned){ if(s===end) lastDone=true; continue; }
+        if(done){ run++; if(s===end) lastDone=true; }
+        else if(!isPendingToday){ best=Math.max(best,run); run=0; if(s===end) lastDone=false; }
+        else if(s===end) lastDone=true;
+      }
+      best=Math.max(best,run); count=lastDone?run:0;
+      state.streaks[type].best=best;
+      const ws=weekStart(end); const week=Array.from({length:7},(_,i)=>{const s=addDays(ws,i);return {date:s,done:type==="training"?completedTask(s,"body")>0:(getDay(s,false).snapshot||[]).some(t=>t.title===(type==="god"?"Библия":"Изоляция от всех")&&getDay(s,false).done[t.id])};});
+      return {count,best,week};
+    }
+    function renderStreak(type,title,subtitle,image){
+      const st=state.streaks[type]; if(st.deleted) return "";
+      const data=currentStreak(type), max=Number(st.goal||0), pct=max?clamp(data.count/max*100,0,100):0;
+      const days=data.week.map(x=>'<i class="'+(x.done?'done':'')+'"></i>').join("");
+      return '<article class="card hero streak-card spotlight" data-streak="'+type+'" style="background-image:url(\''+esc(image||"")+'\')"><div class="hold-ring"></div><div class="hero-top"><div><div class="hero-name">'+esc(title)+'</div><div class="hero-count mono" data-counter="'+data.count+'">'+data.count+'</div></div><div class="pill">'+(max?data.count+" / "+max+" дн.":"дней")+'</div></div><div class="hero-foot"><div class="week-dots">'+days+'</div><div class="subtle">Лучшая серия: <span class="mono">'+data.best+'</span></div></div>'+(max?'<div class="progress" style="margin-top:12px"><div class="fill" data-value="'+pct+'"></div></div>':"")+'<div class="subtle" style="margin-top:8px;font-size:10px">'+esc(subtitle)+' · удерживайте 4 сек. для сброса</div></article>';
+    }
+    function blockStatus(s,block){
+      if(s>today()) return "";
+      if(s<today()) return "past";
+      const h=new Date().getHours()+new Date().getMinutes()/60;
+      const spans={work:[9,18],body:[19,20],skill:[20.16,20.85],recovery:[21,21.5],god:[23,24]};
+      const span=spans[block]; return span&&h>=span[0]&&h<=span[1]?"current":"";
+    }
+    function checkIcon(done){return done?'<svg viewBox="0 0 20 20"><path d="m4 10 4 4 8-9"/></svg>':"";}
+    function taskRows(s,block){
+      const d=getDay(s,false), items=(d.snapshot||[]).filter(t=>t.block===block);
+      if(!items.length) return '<div class="empty-slot">Свободный слот</div>';
+      return items.map(t=>{
+        const done=!!d.done[t.id], disabled=(s>today()||((s<today()||d.closed)&&!state.profile.allowPastEdit));
+        return '<div class="task-row" data-task-row="'+esc(t.id)+'"><button class="check '+(done?"done":"")+'" data-action="toggle-task" data-date="'+s+'" data-id="'+esc(t.id)+'" '+(disabled?"disabled":"")+' aria-label="'+(done?"Снять отметку":"Отметить")+'">'+checkIcon(done)+'</button><div class="task-copy"><div class="task-title" '+(t.kind==="custom"&&!disabled?'data-custom-edit="'+esc(t.id)+'"':"")+'>'+esc(t.title)+'</div>'+(t.details?'<div class="task-details">'+esc(t.details)+'</div>':"")+'</div>'+(t.kind==="custom"&&!disabled?'<button class="task-more" data-action="edit-custom" data-date="'+s+'" data-id="'+esc(t.id)+'" aria-label="Изменить задачу">···</button><button class="task-more task-remove" data-action="remove-custom" data-date="'+s+'" data-id="'+esc(t.id)+'" aria-label="Удалить задачу">×</button>':"")+'</div>';
+      }).join("");
+    }
+    function renderBlock(s,block,title,time){
+      const d=getDay(s,false), count=(d.snapshot||[]).filter(t=>t.block===block).length, done=completedTask(s,block);
+      if(block==="work"&&!isWeekday(s)) return "";
+      const key=s+":"+block, isOpen=collapsed[key]!==true;
+      return '<section class="card block '+blockStatus(s,block)+'"><button class="block-header" data-action="collapse" data-key="'+esc(key)+'"><span class="block-title">'+title+'</span><span class="block-time">'+time+'</span><span class="block-count">'+done+' из '+count+'</span></button>'+(isOpen?'<div class="block-body">'+taskRows(s,block)+'</div>':"")+'</section>';
+    }
+    function renderWeek(){
+      const start=weekStart(selectedDate), end=addDays(start,6);
+      const days=Array.from({length:7},(_,i)=>{
+        const d=addDays(start,i), active=d===selectedDate, isToday=d===today(), marked=scoreOf(d)>=Math.ceil(10*Number(state.profile.thresholdPct||80)/100);
+        return '<button class="day-btn '+(active?"selected ":"")+(isToday?"today":"")+'" data-action="select-date" data-date="'+d+'"><span class="dow">'+weekNames[i]+'</span><span class="day-num">'+fromISO(d).getDate()+'</span>'+(marked?'<i class="day-mark"></i>':"")+'</button>';
+      }).join("");
+      return '<section class="card week-card"><div class="week-head"><button data-action="week-prev" aria-label="Предыдущая неделя">‹</button><div class="eyebrow">'+dateLabel(start,{day:"numeric",month:"long"})+' — '+dateLabel(end,{day:"numeric",month:"long"})+'</div><button data-action="week-next" aria-label="Следующая неделя">›</button></div><div class="week-days">'+days+'</div></section>';
+    }
+    function renderHome(){
+      const before=today()<state.profile.start, after=today()>state.profile.end;
+      if(after&&!inPeriod(selectedDate)) selectedDate=state.profile.end;
+      const active=inPeriod(selectedDate), d=getDay(selectedDate,active);
+      const score=active?scoreOf(selectedDate):0, total=allScores(), max=maxScore(), target=goalScore(), pct=max?clamp(total/max*100,0,100):0;
+      const countdown=before?diffDays(today(),state.profile.start):0;
+      const isoImage=state.profile.photo&&state.profile.photo.startsWith("data:")?state.profile.photo:ASSET+(state.profile.photo||"batman.jpg");
+      let titleLine=before&&!active?"Старт "+dateLabel(state.profile.start,{day:"numeric",month:"long"}):after?"Период завершён":active?"День "+dayNumber(selectedDate)+" из "+periodLength():"Вне периода";
+      const mainHeader='<div class="brand"><div class="brand-title">free26</div><div class="brand-sub">'+dateLabel(selectedDate,{weekday:"long",day:"numeric",month:"long"})+' · '+titleLine+'</div></div><div class="top-actions"><button class="icon-btn" data-action="open-cycle" aria-label="Цикл">'+icons.cycle+'</button><button class="icon-btn" data-action="open-profile" aria-label="Профиль">'+icons.profile+'</button></div>';
+      topbar.innerHTML=mainHeader;
+      if(after){
+        const percent=max?Math.round(total/max*100):0, won=total>=target;
+        return '<section class="card center"><div class="eyebrow">ИТОГ ЧЕЛЛЕНДЖА</div><div class="hero-count mono" style="margin:18px 0 5px">'+total+'</div><div class="subtle">баллов из '+max+' · '+percent+'%</div><div class="progress large" style="margin:18px 0 10px"><div class="fill" data-value="'+pct+'"></div></div><div class="section-label" style="color:'+(won?"var(--ok)":"var(--dim)")+'">'+(won?"Цель выполнена":"Цель не выполнена")+'</div><div class="subtle" style="margin-top:8px">Нужно '+target+' баллов · набрано '+total+'</div></section>';
+      }
+      const scoreCard=active?'<section class="card"><div class="card-head"><span class="eyebrow">ПРОГРЕСС ДНЯ</span><span class="score-number"><b data-counter="'+score+'">'+score+'</b> <small>/ 10</small></span></div><div class="dots">'+Array.from({length:10},(_,i)=>'<i class="dot '+(i<score?"on":"")+'"></i>').join("")+'</div><div class="period-row"><span>Набрано <b class="mono" data-counter="'+total+'">'+total+'</b> / '+max+'</span><span>цель '+target+'</span></div><div class="progress"><div class="fill main-period-fill" data-value="'+pct+'"></div></div><div class="subtle" style="margin-top:8px;font-size:10px">Свободные слоты: '+Math.max(0,10-(d.snapshot||[]).length)+'</div></section>':'';
+      const countdownCard=before?'<section class="card"><div class="eyebrow">ДО СТАРТА</div><div class="hero-count mono" style="margin:13px 0 6px">'+countdown+'</div><div class="subtle">'+(countdown===1?"день":"дней")+' · подготовь цикл и цели в Профиле</div></section>':"";
+      const viewTitle=active?'<div class="eyebrow">'+dateLabel(selectedDate,{weekday:"long",day:"numeric",month:"long"})+'</div>':'';
+      return renderWeek()+renderStreak("isolation","ИЗОЛЯЦИЯ","Дни без связи с людьми",isoImage)+countdownCard+scoreCard+viewTitle+(active?renderBlock(selectedDate,"daily",blocks.daily,"В течение дня")+renderBlock(selectedDate,"work",blocks.work,times.work)+renderBlock(selectedDate,"body",blocks.body,times.body)+renderBlock(selectedDate,"skill",blocks.skill,times.skill)+renderBlock(selectedDate,"recovery",blocks.recovery,times.recovery)+renderBlock(selectedDate,"god",blocks.god,times.god):'<section class="card"><div class="subtle">Выберите день челленджа в календаре или отредактируйте цикл.</div></section>')+'<button class="primary-btn shimmer full" data-action="add-task">+ Добавить задачу на день</button>';
+    }
+    function pctBar(value,max,cls=""){ return '<div class="progress '+cls+'"><div class="fill '+(cls==="cool"?"cool":"")+'" data-value="'+(max?clamp(value/max*100,0,100):0)+'"></div></div>'; }
+    function weekDates(end=today()){ const ws=weekStart(end); return Array.from({length:7},(_,i)=>addDays(ws,i)); }
+    function weeklyBodyStats(){
+      const dates=weekDates(), planned=dates.reduce((a,s)=>a+plannedTask(s,"body"),0), done=dates.reduce((a,s)=>a+completedTask(s,"body"),0);
+      const sessions=(state.body.sessions||[]).filter(x=>dates.includes(x.date)), minutes=sessions.reduce((a,x)=>a+Number(x.minutes||0),0);
+      return {dates,planned,done,minutes,sessions};
+    }
+    function lineChart(values,labels){
+      const w=320,h=112,p=12, max=Math.max(1,...values), min=Math.min(0,...values), denom=Math.max(1,max-min);
+      const pts=values.map((v,i)=>({x:p+i*(w-2*p)/Math.max(1,values.length-1),y:h-p-(v-min)/denom*(h-2*p)}));
+      const line=pts.map(a=>a.x+","+a.y).join(" ");
+      const area="M "+pts[0].x+" "+(h-p)+" L "+pts.map(a=>a.x+" "+a.y).join(" L ")+" L "+pts[pts.length-1].x+" "+(h-p)+" Z";
+      return '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><path class="gridline" d="M0 '+(h/2)+'H'+w+'"/><path class="area" d="'+area+'"/><polyline class="line" points="'+line+'"/>'+pts.map((a,i)=>'<circle cx="'+a.x+'" cy="'+a.y+'" r="2.5" fill="#E8C766"/>'+(labels&&labels[i]?'<text x="'+a.x+'" y="'+(h-1)+'" text-anchor="middle">'+esc(labels[i])+'</text>':"")).join("")+'</svg>';
+    }
+    function barChart(values,labels){
+      const max=Math.max(1,...values);
+      return '<div class="bar-chart">'+values.map((v,i)=>'<div class="bar-col"><div class="bar" style="height:'+Math.max(3,v/max*88)+'%"></div><span class="bar-label">'+esc(labels[i]||"")+'</span></div>').join("")+'</div>';
+    }
+    function trainingDays(){
+      const arr=[]; let s=state.profile.start;
+      for(let i=0;i<periodLength();i++){const d=addDays(s,i);arr.push(d);}
+      return arr;
+    }
+    function renderBody(){
+      const data=weeklyBodyStats(), all=trainingDays(), trained=all.filter(s=>completedTask(s,"body")>0).length, streak=currentStreak("training");
+      const points=all.map(s=>'<i class="dot '+(completedTask(s,"body")>0?"on":"")+'" title="'+dateLabel(s)+'"></i>').join("");
+      const weekTotals=Array.from({length:6},(_,i)=>{
+        const ws=addDays(weekStart(state.profile.start),i*7), ds=Array.from({length:7},(_,j)=>addDays(ws,j)).filter(s=>inPeriod(s));
+        return {n:ds.reduce((a,s)=>a+completedTask(s,"body"),0),m:(state.body.sessions||[]).filter(x=>ds.includes(x.date)).reduce((a,x)=>a+Number(x.minutes||0),0)};
+      });
+      const weights=(state.body.weights||[]).slice(-8), weightValues=weights.map(x=>Number(x.kg)), weightLabels=weights.map(x=>dateLabel(x.date,{day:"numeric",month:"numeric"}));
+      return '<div class="row between"><div><div class="eyebrow">ТЕЛО</div><h1 class="page-title">Тренировки</h1></div><span class="pill">'+trained+' / '+periodLength()+'</span></div>'+renderStreak("training","ТРЕНИРОВКИ ПОДРЯД","Запланированные дни тела")+
+        '<section class="card spotlight"><div class="card-head"><div><div class="eyebrow">ATHLETIC SCORE</div><div class="hero-count mono" style="font-size:35px;margin-top:8px">'+trained+'</div><div class="subtle">тренировок за период</div></div><div class="metric-list"><div class="metric"><span>За неделю</span><b>'+data.done+'</b></div><div class="metric"><span>Минуты</span><b>'+data.minutes+'</b></div><div class="metric"><span>Серия</span><b>'+streak.best+' дн.</b></div><div class="metric"><span>План</span><b>'+(data.planned?Math.round(data.done/data.planned*100):0)+'%</b></div></div></div><div class="dots" style="grid-template-columns:repeat(14,1fr);gap:5px">'+points+'</div></section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ТРЕНИРОВКИ ПО НЕДЕЛЯМ</span></div>'+barChart(weekTotals.map(x=>x.n),weekTotals.map((x,i)=>"Н"+(i+1)))+'<div class="eyebrow" style="margin-top:12px">МИНУТЫ В НЕДЕЛЮ</div>'+barChart(weekTotals.map(x=>x.m),weekTotals.map((x,i)=>"Н"+(i+1)))+'</section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ЖУРНАЛ ТРЕНИРОВОК</span><button class="secondary-btn" data-action="body-session">+ Запись</button></div>'+(data.sessions.length?data.sessions.slice().reverse().map(x=>'<div class="record"><span>'+dateLabel(x.date,{day:"numeric",month:"short"})+(x.notes?" · "+esc(x.notes):"")+'</span><span class="mono">'+x.minutes+' мин</span></div>').join(""):'<div class="subtle">Пока нет записей. Отмечайте задачи в блоке «Тело».</div>')+'</section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ВЕС ТЕЛА</span><button class="secondary-btn" data-action="weight-add">+ Вес</button></div>'+(weights.length?lineChart(weightValues,weightLabels):'<div class="subtle">Записывайте вес раз в неделю.</div>')+(weights.length?weights.slice().reverse().map(x=>'<div class="record"><span>'+dateLabel(x.date,{day:"numeric",month:"short"})+'</span><span class="mono">'+x.kg+' кг</span></div>').join(""):"")+'</section>';
+    }
+    function moneyBalance(){
+      const savings=state.money.savings||[];
+      return savings.reduce((a,x)=>a+Number(x.balance||0),0)+Number(state.money.freeBalance||0);
+    }
+    function distributeIncome(amount){
+      const cents=Math.round(Number(amount)*100), savings=state.money.savings||[];
+      let allocations=savings.map(s=>({savingId:s.id,amount:Math.round(cents*Number(s.percent||0)/100)/100}));
+      const totalPct=savings.reduce((a,s)=>a+Number(s.percent||0),0);
+      let assigned=allocations.reduce((a,x)=>a+Math.round(x.amount*100),0);
+      if(totalPct>=99.999&&allocations.length){
+        const idx=savings.reduce((best,s,i)=>Number(s.percent)>Number(savings[best].percent)?i:best,0);
+        allocations[idx].amount=Math.round((allocations[idx].amount*100+cents-assigned))/100;
+      }else{
+        allocations.push({savingId:"free",amount:Math.max(0,(cents-assigned)/100)});
+      }
+      return allocations;
+    }
+    function opsForSaving(id){ return (state.money.ops||[]).filter(o=>o.type==="expense"?o.savingId===id:o.allocations&&o.allocations.some(a=>a.savingId===id)); }
+    function renderMoney(){
+      const savings=state.money.savings||[], allocated=savings.reduce((a,s)=>a+Number(s.percent||0),0), balance=moneyBalance();
+      const totalIn=(state.money.ops||[]).filter(o=>o.type==="income").reduce((a,o)=>a+Number(o.amount||0),0);
+      const totalSaved=balance, freePct=Math.max(0,100-allocated);
+      const opDates=Array.from({length:14},(_,i)=>addDays(today(),i-13));
+      const balSeries=opDates.map(date=>(state.money.ops||[]).filter(o=>o.date<=date).reduce((sum,o)=>sum+(o.type==="income"?Number(o.amount||0):-Number(o.amount||0)),0));
+      const goal=Number(state.money.goal||state.profile.goals.money||0);
+      const cards=savings.length?savings.map(s=>'<article class="saving-card spotlight" data-saving="'+esc(s.id)+'" data-action="saving-detail"><div class="saving-name">'+esc(s.name.toUpperCase())+'</div><div class="saving-balance mono">'+moneyFmt(s.balance)+'</div><div class="saving-foot"><span>'+s.percent+'% распределения</span><span>•• ••</span></div></article>').join(""):'<div class="card" style="min-width:100%"><div class="section-label">Пока нет накоплений</div><div class="subtle" style="margin:8px 0 14px">Создайте карту для распределения дохода.</div><button class="secondary-btn" data-action="saving-create">+ Накопление</button></div>';
+      const ops=(state.money.ops||[]).slice().sort((a,b)=>(b.createdAt||b.date||"").localeCompare(a.createdAt||a.date||"")).slice(0,8);
+      return '<div><div class="eyebrow">ДЕНЬГИ</div><h1 class="page-title">Накопления</h1></div>'+
+        '<section class="card"><div class="eyebrow">ОБЩИЙ БАЛАНС</div><div class="hero-count mono" style="font-size:38px;margin:9px 0 16px">'+moneyFmt(balance)+'</div><div class="row between subtle"><span>Всего получено</span><span class="mono">'+moneyFmt(totalIn)+'</span></div><div class="row between subtle" style="margin-top:6px"><span>Всего накоплено</span><span class="mono">'+moneyFmt(totalSaved)+'</span></div>'+lineChart(balSeries,opDates.map(x=>dateLabel(x,{day:"numeric"})))+'</section>'+
+        (goal?'<section class="card"><div class="card-head"><span class="eyebrow">ЦЕЛЬ НАКОПЛЕНИЙ</span><b class="mono">'+Math.round(balance/goal*100)+'%</b></div><div class="row between subtle"><span>'+moneyFmt(balance)+'</span><span>цель '+moneyFmt(goal)+'</span></div>'+pctBar(balance,goal)+'</section>':"")+
+        '<div class="row between"><span class="eyebrow">РАСПРЕДЕЛЕНИЕ</span><span class="mono subtle">'+allocated+'% / 100% · свободно '+freePct+'%</span></div><div class="distribution">'+savings.map(s=>'<i style="width:'+Number(s.percent)+'%"></i>').join("")+(freePct?'<i style="width:'+freePct+'%;background:#3b3b42"></i>':"")+'</div>'+
+        '<div class="saving-strip">'+cards+(freePct||Number(state.money.freeBalance||0)?'<article class="saving-card" style="background:linear-gradient(135deg,#242429,#18181c)"><div class="saving-name">СВОБОДНЫЕ</div><div class="saving-balance mono">'+moneyFmt(state.money.freeBalance)+'</div><div class="saving-foot"><span>Не распределено</span><button class="pill" data-action="withdraw" data-saving="free">Снять</button></div></article>':"")+'</div>'+
+        '<div class="row"><button class="primary-btn full shimmer" data-action="income">+ Доход</button><button class="secondary-btn" data-action="saving-create">+ Карта</button></div>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ПО НАКОПЛЕНИЯМ</span></div>'+barChart(savings.map(s=>Number(s.balance)),savings.map(s=>s.name.slice(0,5)))+'</section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ПОСЛЕДНИЕ ОПЕРАЦИИ</span></div>'+(ops.length?ops.map(o=>'<div class="op-row"><div><div>'+esc(o.note||o.source||(o.type==="income"?"Доход":"Снятие"))+'</div><div class="subtle">'+dateLabel(o.date,{day:"numeric",month:"short"})+'</div></div><span class="op-amount '+(o.type==="income"?"positive":"negative")+'">'+(o.type==="income"?"+":"−")+moneyFmt(o.amount)+'</span>'+(o.type==="income"?'<button class="task-more" data-action="undo-income" data-id="'+esc(o.id)+'">Отменить</button>':"")+'</div>').join(""):'<div class="subtle">Операций пока нет.</div>')+'</section>';
+    }
+    function skillLevel(xp){
+      const thresholds=[150,450,900,1500,2400]; let level=1, prev=0,next=thresholds[0];
+      for(let i=0;i<thresholds.length;i++){if(xp>=thresholds[i]){level=i+2;prev=thresholds[i];next=thresholds[i+1]||thresholds[i]+1000;}else{next=thresholds[i];break;}}
+      return {level,prev,next,progress:clamp((xp-prev)/(next-prev)*100,0,100)};
+    }
+    function timerSeconds(){
+      const t=state.skill.timer; return Number(t.elapsed||0)+(t.running?Math.max(0,Math.floor((Date.now()-t.startedAt)/1000)):0);
+    }
+    function renderSkill(){
+      const xp=Number(state.skill.xp||0), lvl=skillLevel(xp), seconds=timerSeconds(), remain=Math.max(0,40*60-Math.floor(seconds));
+      const rows=Array.from({length:36},(_,i)=>'<i class="'+(i<Math.round(lvl.progress/100*36)?"lit":"")+'"></i>').join("");
+      const sessions=(state.skill.sessions||[]).slice().reverse().slice(0,7);
+      const vals=sessions.slice().reverse().map(x=>x.minutes), labels=sessions.slice().reverse().map(x=>dateLabel(x.date,{day:"numeric",month:"numeric"}));
+      const goal=Number(state.profile.goals.skill||0), reached=[150,450,900,1500,2400].filter(x=>xp>=x);
+      const levelList=reached.length?reached.map((x,i)=>'<div class="record"><span>Level '+(i+2)+'</span><span class="mono">'+x+' XP</span></div>').join(""):'<div class="subtle">Первый уровень ещё впереди.</div>';
+      const mm=String(Math.floor(remain/60)).padStart(2,"0"), ss=String(remain%60).padStart(2,"0");
+      return '<div><div class="eyebrow">НАВЫК</div><h1 class="page-title">'+esc(state.profile.skillName||"Навык")+'</h1><div class="subtle" style="margin-top:5px">Блок 20:10–20:50 · цель '+Number(state.profile.goals.skill||0)+' XP</div></div>'+
+        '<section class="card"><div class="pixel">'+rows+'</div><div class="level">Level '+lvl.level+'</div><div class="xp-text">'+xp+' / '+lvl.next+' XP</div>'+pctBar(xp-lvl.prev,lvl.next-lvl.prev)+'<div class="subtle center" style="margin-top:12px">До следующего уровня: '+Math.max(0,lvl.next-xp)+' XP</div>'+(goal?'<div class="eyebrow" style="margin-top:18px">ЦЕЛЬ НА ПЕРИОД</div><div class="period-row" style="margin-top:8px"><span>'+xp+' XP</span><span>'+goal+' XP</span></div>'+pctBar(xp,goal):"")+'<div class="eyebrow" style="margin-top:16px">ПРОЙДЕННЫЕ УРОВНИ</div>'+levelList+'</section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ПРАКТИКА · 40 МИН</span><span class="pill">1 мин = 1 XP</span></div><div id="timer" class="timer mono">'+mm+':'+ss+'</div><div class="row"><button class="primary-btn full" data-action="timer-toggle">'+(state.skill.timer.running?"Пауза":"Старт")+'</button><button class="secondary-btn" data-action="timer-reset">Сброс</button></div><div class="subtle center" style="margin-top:11px">Задача навыка даёт +10 XP</div></section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">МИНУТЫ ПРАКТИКИ</span></div>'+(vals.length?lineChart(vals,labels):'<div class="subtle">Запустите таймер, чтобы вести журнал.</div>')+sessions.map(x=>'<div class="record"><span>'+dateLabel(x.date,{day:"numeric",month:"short"})+'</span><span class="mono">'+x.minutes+' мин · +'+x.xp+' XP</span></div>').join("")+'</section>';
+    }
+    function monthCalendar(){
+      const s=selectedDate||today(), d=fromISO(s), year=d.getFullYear(), month=d.getMonth(), first=new Date(year,month,1,12), offset=(first.getDay()+6)%7, count=new Date(year,month+1,0).getDate();
+      const cells=Array.from({length:offset},()=>'<i class="cal-day" style="visibility:hidden"></i>');
+      for(let n=1;n<=count;n++){const ds=localISO(new Date(year,month,n,12));cells.push('<i class="cal-day '+(completedTask(ds,"god")>0?"has":"")+'">'+n+'</i>');}
+      return '<div class="calendar">'+weekNames.map(x=>'<span class="eyebrow center">'+x+'</span>').join("")+cells.join("")+'</div>';
+    }
+    function renderGod(){
+      const note=(state.god.notes||{})[today()]||"", weeks=Array.from({length:8},(_,i)=>{const ws=addDays(weekStart(today()),-(7*(7-i)));return Array.from({length:7},(_,j)=>addDays(ws,j)).reduce((a,s)=>a+completedTask(s,"god"),0);});
+      return '<div><div class="eyebrow">ДУХОВНАЯ СИЛА</div><h1 class="page-title">Живу во Христе</h1></div>'+renderStreak("god","ЖИВУ БЕЗ ВРЕДНЫХ ПРИВЫЧЕК И ВО ХРИСТЕ","Библия и молитва")+
+        '<section class="card"><div class="card-head"><span class="eyebrow">СЕГОДНЯ · 23:00</span><span class="pill">'+(completedTask(today(),"god")?"Выполнено":"Библия и молитва")+'</span></div><div class="field"><label for="god-note">Заметка · до 500 символов</label><textarea id="god-note" maxlength="500" placeholder="Что прочитал / за что молился">'+esc(note)+'</textarea></div><div class="row between" style="margin-top:12px"><span class="subtle">Сохранение происходит автоматически</span><button class="secondary-btn" data-action="god-done">'+(completedTask(today(),"god")?"Снять отметку":"Отметить")+'</button></div></section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">КАЛЕНДАРЬ БИБЛИИ</span><span class="mono subtle">'+dateLabel(selectedDate,{month:"long",year:"numeric"})+'</span></div>'+monthCalendar()+'</section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">БИБЛИЯ ПО НЕДЕЛЯМ</span></div>'+barChart(weeks,weeks.map((x,i)=>"Н"+(i+1)))+'</section>'+
+        '<div class="info">Для напоминания в 23:00 добавьте время в системное приложение «Напоминания».</div>';
+    }
+    function goalsProgress(){
+      const gd=state.profile.goals||{}, body=trainingDays().filter(s=>completedTask(s,"body")>0).length, god=trainingDays().filter(s=>completedTask(s,"god")>0).length;
+      return [
+        {name:"Тело",value:body,goal:Number(gd.body||0),unit:"трен."},
+        {name:"Деньги",value:moneyBalance(),goal:Number(gd.money||state.money.goal||0),unit:"₽"},
+        {name:state.profile.skillName||"Навык",value:Number(state.skill.xp||0),goal:Number(gd.skill||0),unit:"XP"},
+        {name:"Духовная сила",value:god,goal:Number(gd.god||0),unit:"дн."}
+      ];
+    }
+    function renderProfile(){
+      const g=state.profile.goals||{}, tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"по устройству";
+      const photos=[["batman.jpg","По умолчанию"],["signal.jpg","Сигнал"],["bat-mark.jpg","Знак"],["portrait.jpg","Портрет"]];
+      const photoHtml=photos.map(p=>'<button type="button" class="photo-choice '+(state.profile.photo===p[0]?"active":"")+'" data-action="photo-select" data-photo="'+p[0]+'" title="'+p[1]+'" style="background-image:linear-gradient(0deg,rgba(0,0,0,.18),transparent),url(\''+ASSET+p[0]+'\')"></button>').join("");
+      const goals=goalsProgress(), activeGoals=goals.filter(x=>x.goal>0);
+      const overall=activeGoals.length?Math.round(activeGoals.reduce((a,x)=>a+clamp(x.value/x.goal*100,0,100),0)/activeGoals.length):0;
+      const goalHtml=goals.map(x=>'<div class="goal-row"><span class="subtle">'+esc(x.name)+'</span><span class="mono">'+(x.unit==="₽"?moneyFmt(x.value):x.value+" "+x.unit)+' / '+(x.goal?(x.unit==="₽"?moneyFmt(x.goal):x.goal+" "+x.unit):"цель не задана")+'</span>'+(x.goal?pctBar(x.value,x.goal):'<div class="subtle">Цель не задана</div>')+'</div>').join("");
+      return '<div class="row between"><div><div class="eyebrow">НАСТРОЙКИ</div><h1 class="page-title">Профиль</h1></div><button class="icon-btn" data-action="go-home" aria-label="Назад">'+icons.back+'</button></div>'+
+        '<section class="card"><form id="profile-form" class="form-grid"><div class="eyebrow">ПЕРИОД ЧЕЛЛЕНДЖА</div><div class="inline-field"><div class="field"><label>Начало</label><input name="start" type="date" value="'+esc(state.profile.start)+'" required></div><div class="field"><label>Цель, %</label><input name="threshold" type="number" min="1" max="100" value="'+Number(state.profile.thresholdPct||80)+'"></div></div><div class="field"><label>Окончание</label><input name="end" type="date" value="'+esc(state.profile.end)+'" required></div><div class="subtle">Максимум <span class="mono">'+maxScore()+'</span> баллов · цель <span class="mono">'+goalScore()+'</span> баллов</div>'+
+        '<div class="eyebrow" style="margin-top:6px">ЦЕЛИ ПО РАЗДЕЛАМ</div><div class="inline-field"><div class="field"><label>Тело · тренировок</label><input name="goalBody" type="number" min="0" value="'+Number(g.body||0)+'"></div><div class="field"><label>Деньги · ₽</label><input name="moneyGoal" type="number" min="0" value="'+Number(state.money.goal||g.money||0)+'"></div></div><div class="inline-field"><div class="field"><label>Название навыка</label><input name="skillName" value="'+esc(state.profile.skillName||"")+'"></div><div class="field"><label>Цель XP</label><input name="goalSkill" type="number" min="0" value="'+Number(g.skill||0)+'"></div></div><div class="field"><label>Духовная сила · дней</label><input name="goalGod" type="number" min="0" value="'+Number(g.god||0)+'"></div><button class="primary-btn full" type="submit">Сохранить цели</button></form></section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ПРОГРЕСС К ЦЕЛЯМ</span><b class="mono">'+overall+'%</b></div>'+pctBar(overall,100)+'<div class="form-grid" style="margin-top:14px">'+goalHtml+'</div></section>'+
+        '<section class="card"><div class="card-head"><span class="eyebrow">ФОТО ИЗОЛЯЦИИ</span></div><div class="photo-options">'+photoHtml+'</div><button class="secondary-btn full" style="margin-top:10px" data-action="photo-upload">Загрузить фото</button><div class="subtle" style="margin-top:8px">Фото сжимается до 800 КБ.</div></section>'+
+        '<section class="card"><div class="row between"><div><div class="section-label">Правка прошлых дней</div><div class="subtle">По умолчанию выключена</div></div><button class="toggle '+(state.profile.allowPastEdit?"on":"")+'" data-action="toggle-past" aria-pressed="'+!!state.profile.allowPastEdit+'"><i></i></button></div></section>'+
+        '<section class="card"><div class="eyebrow">ПАНЕЛИ СТИКОВ</div><div class="form-grid" style="margin-top:13px">'+["isolation","training","god"].map((k,i)=>'<div class="inline-field"><div class="field"><label>'+["Изоляция","Тренировки подряд","В жизни во Христе"][i]+' · цель в днях</label><input data-streak-goal="'+k+'" type="number" min="0" value="'+Number(state.streaks[k].goal||0)+'"></div><button class="secondary-btn" data-action="save-streak-goal" data-streak="'+k+'">Сохранить</button></div>').join("")+(Object.values(state.streaks).some(x=>x.deleted)?'<button class="secondary-btn full" data-action="restore-streaks">Восстановить панели</button>':"")+'</div></section>'+
+        '<section class="card"><div class="eyebrow">ДАННЫЕ</div><div class="subtle" style="margin:8px 0 14px">Часовой пояс устройства: '+esc(tz)+'</div><div class="row wrap"><button class="secondary-btn" data-action="export">Экспорт данных</button><button class="secondary-btn" data-action="import">Импорт данных</button></div><div class="subtle" style="margin-top:10px">Библия в 23:00 · при необходимости добавьте системное напоминание.</div></section>'+
+        '<button class="danger-btn full" data-action="reset-hold">Удерживайте 4 сек. · Сбросить всё</button>';
+    }
+    function renderCycle(){
+      const lists=state.cycle[cycleDay]||{body:[],skill:[],recovery:[]};
+      const tasksCount=lists.body.length+lists.skill.length+lists.recovery.length;
+      const sections=["body","skill","recovery"].map(key=>{
+        const arr=lists[key]||[];
+        return '<section class="card"><div class="card-head"><div><div class="section-label">'+blocks[key]+'</div><div class="subtle">'+({body:"60 мин",skill:"40 мин",recovery:"30 мин"}[key])+'</div></div><button class="secondary-btn" data-action="cycle-add" data-block="'+key+'">+ Добавить</button></div>'+(arr.length?arr.map((t,i)=>'<div class="task-row" draggable="true" data-cycle-row="1" data-block="'+key+'" data-index="'+i+'"><div class="task-copy"><div class="task-title">'+esc(t.title)+'</div>'+(t.details?'<div class="task-details">'+esc(t.details)+'</div>':"")+'</div><button class="task-more" data-action="cycle-up" data-block="'+key+'" data-index="'+i+'">↑</button><button class="task-more" data-action="cycle-down" data-block="'+key+'" data-index="'+i+'">↓</button><button class="task-more" data-action="cycle-edit" data-block="'+key+'" data-id="'+esc(t.id)+'">✎</button><button class="task-more task-remove" data-action="cycle-delete" data-block="'+key+'" data-id="'+esc(t.id)+'">×</button></div>').join(""):'<div class="subtle">Задач пока нет.</div>')+'</section>';
+      }).join("");
+      return '<div class="row between"><div><div class="eyebrow">ЦИКЛ</div><h1 class="page-title">Неделя</h1></div><button class="icon-btn" data-action="go-home" aria-label="Назад">'+icons.back+'</button></div><div class="segmented">'+weekNames.map((x,i)=>'<button class="'+(cycleDay===weekKeys[i]?"active":"")+'" data-action="cycle-day" data-day="'+weekKeys[i]+'">'+x+'</button>').join("")+'</div><div class="row between"><span class="eyebrow">ОСНОВНЫЕ ЗАДАЧИ</span><span class="mono '+(tasksCount>3?"negative":"muted")+'">'+tasksCount+' из 3</span></div>'+(tasksCount>3?'<div class="info">В дне максимум 10 задач. Дополнительные задачи сократят свободные слоты.</div>':"")+sections+'<section class="card"><div class="eyebrow">КОПИРОВАТЬ ДЕНЬ</div><div class="subtle" style="margin:7px 0 12px">Скопировать '+weekNames[weekKeys.indexOf(cycleDay)]+' в выбранные дни</div><div class="segmented wrap">'+weekNames.map((x,i)=>'<label class="pill"><input type="checkbox" class="copy-day" value="'+weekKeys[i]+'" '+(cycleDay===weekKeys[i]?"disabled":"")+'> '+x+'</label>').join("")+'</div><button class="secondary-btn full" style="margin-top:12px" data-action="cycle-copy">Копировать день</button></section>';
+    }
+    function render(){
+      if(view==="home") screen.innerHTML=renderHome();
+      else{
+        const pageTitle=view==="cycle"?"Цикл":view==="profile"?"Профиль":(tabLabels[view]||"free26");
+        topbar.innerHTML='<div class="brand"><div class="brand-title">free26</div><div class="brand-sub">'+pageTitle+'</div></div><div class="top-actions"><button class="icon-btn" data-action="go-home" aria-label="Главная">'+icons.back+'</button></div>';
+        if(view==="body") screen.innerHTML=renderBody();
+        if(view==="money") screen.innerHTML=renderMoney();
+        if(view==="skill") screen.innerHTML=renderSkill();
+        if(view==="god") screen.innerHTML=renderGod();
+        if(view==="profile") screen.innerHTML=renderProfile();
+        if(view==="cycle") screen.innerHTML=renderCycle();
+      }
+      renderNav();
+      animateIn();
+      syncGodNote();
+      ensureTimerLoop();
+    }
+    function renderNav(){
+      nav.innerHTML=tabs.map(k=>'<button class="nav-btn '+(view===k?"active":"")+'" data-nav="'+k+'">'+icons[k]+'<span>'+tabLabels[k]+'</span></button>').join("");
+    }
+    function animateIn(){
+      const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if(!reduced&&typeof motionAnimate==="function") motionAnimate(screen,{opacity:[0,1],y:[7,0]},{duration:.22,ease:"easeOut"});
+      if(!reduced&&window.anime){
+        anime({targets:".card",opacity:[0,1],translateY:[8,0],delay:anime.stagger(35),duration:250,easing:"easeOutQuad"});
+        $$(".fill[data-value]").forEach(el=>{const n=Number(el.dataset.value||0);anime({targets:el,width:[0,n+"%"],duration:360,easing:"easeOutCubic"});});
+        anime({targets:".dot.on",scale:[.45,1],delay:anime.stagger(18),duration:220,easing:"easeOutBack"});
+        $$("[data-counter]").forEach(el=>{
+          const end=Number(el.dataset.counter||0), obj={value:0};
+          anime({targets:obj,value:end,round:1,duration:340,easing:"easeOutCubic",update:()=>{el.textContent=Number(obj.value).toLocaleString("ru-RU");}});
+        });
+      }else $$(".fill[data-value]").forEach(el=>el.style.width=(el.dataset.value||0)+"%");
+    }
+    function toast(message){
+      const t=$("#toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+    }
+    function checkGodReminder(){
+      const now=new Date();
+      if(now.getHours()===23&&inPeriod(today())&&completedTask(today(),"god")===0&&reminderShown!==today()){
+        reminderShown=today();toast("23:00 · Библия и молитва");
+      }
+    }
+    function vibrate(){ if(navigator.vibrate) navigator.vibrate(12); }
+    function openSheet(title,html,submit,label="Сохранить"){
+      sheetContent.innerHTML='<h2 class="sheet-title">'+title+'</h2><form id="sheet-form"><div class="form-grid">'+html+'</div><div class="sheet-actions"><button class="secondary-btn" type="button" data-action="close-sheet">Отмена</button><button class="primary-btn" type="submit">'+label+'</button></div></form>';
+      sheetSubmit=submit;backdrop.classList.add("open");
+      if(typeof motionAnimate==="function"&&!matchMedia("(prefers-reduced-motion: reduce)").matches) motionAnimate($("#sheet"),{y:["30px","0px"]},{duration:.26,ease:"easeOut"});
+      $("#sheet-form").addEventListener("submit",async e=>{e.preventDefault();if(sheetSubmit) await sheetSubmit(new FormData(e.currentTarget),e.currentTarget);});
+      setTimeout(()=>{const f=$("input:not([type=hidden]),select,textarea",sheetContent);if(f)f.focus({preventScroll:true});},100);
+    }
+    function closeSheet(value){
+      backdrop.classList.remove("open");
+      if(sheetResolve){sheetResolve(value);sheetResolve=null;}
+      sheetSubmit=null;
+    }
+    function confirmAction(title,message,yes="Подтвердить",danger=false){
+      return new Promise(resolve=>{
+        sheetResolve=resolve;
+        sheetContent.innerHTML='<h2 class="sheet-title">'+title+'</h2><div class="subtle">'+message+'</div><div class="sheet-actions"><button class="secondary-btn" type="button" data-action="confirm-no">Отмена</button><button class="'+(danger?"danger-btn":"primary-btn")+'" type="button" data-action="confirm-yes">'+yes+'</button></div>';
+        backdrop.classList.add("open");
+      });
+    }
+    function addCustomTask(form){
+      const s=selectedDate;
+      if(!inPeriod(s)) { toast("Выберите день челленджа"); return; }
+      const d=getDay(s), count=d.snapshot.length;
+      if(count>=10){toast("В дне максимум 10 задач");return;}
+      const title=String(form.get("title")||"").trim(), block=form.get("block");
+      if(!title)return;
+      const t=task(title,block,{kind:"custom"});
+      if(s>today()){ /* future days accept custom tasks; checks stay locked */ }
+      d.snapshot.splice(Math.max(0,d.snapshot.length-2),0,t);
+      syncDay(s);save();closeSheet();render();toast("Задача добавлена");
+    }
+    function editCustomTask(date,id){
+      const d=getDay(date,false),t=d&&d.snapshot.find(x=>x.id===id);if(!t||t.kind!=="custom")return;
+      openSheet("Изменить задачу",'<div class="field"><label>Название</label><input name="title" maxlength="48" required value="'+esc(t.title)+'"></div><div class="field"><label>Блок</label><select name="block">'+["daily","body","skill","recovery"].map(k=>'<option value="'+k+'" '+(k===t.block?"selected":"")+'>'+blocks[k]+'</option>').join("")+'</select></div>',fd=>{
+        t.title=String(fd.get("title")||"").trim();t.block=fd.get("block");syncDay(date);save();closeSheet();render();
+      },"Сохранить");
+    }
+    function addMoneyOp(op){ state.money.ops.unshift(Object.assign({id:uid(),createdAt:new Date().toISOString()},op)); }
+    function openIncome(){
+      const html='<div class="field"><label>Сумма, ₽</label><input name="amount" type="number" min="0.01" step="0.01" required placeholder="10 000"></div><div class="field"><label>Источник · необязательно</label><input name="source" placeholder="Зарплата"></div><div class="field"><label>Дата</label><input name="date" type="date" value="'+today()+'" required></div><div id="income-preview" class="info">Введите сумму, чтобы увидеть распределение.</div>';
+      openSheet("Новый доход",html,(fd,form)=>{
+        const amount=Math.max(0,Number(fd.get("amount")||0));if(!amount)return;
+        const allocations=distributeIncome(amount);
+        allocations.forEach(a=>{if(a.savingId==="free")state.money.freeBalance=Number(state.money.freeBalance||0)+a.amount;else{const s=state.money.savings.find(x=>x.id===a.savingId);if(s)s.balance=Number(s.balance||0)+a.amount;}});
+        addMoneyOp({type:"income",amount,date:fd.get("date"),source:String(fd.get("source")||"").trim(),note:String(fd.get("source")||"Доход"),allocations});
+        save();closeSheet();render();toast("Доход добавлен");
+      },"Добавить доход");
+      const amountInput=$('input[name="amount"]',sheetContent), preview=$("#income-preview");
+      amountInput.addEventListener("input",()=>{
+        const amount=Math.max(0,Number(amountInput.value||0)),allocations=distributeIncome(amount);
+        const lines=allocations.map(a=>{const s=a.savingId==="free"?{name:"Свободные"}:state.money.savings.find(x=>x.id===a.savingId);return '<div class="row between"><span>'+esc(s?s.name:"Свободные")+'</span><b class="mono">'+moneyFmt(a.amount)+'</b></div>';}).join("");
+        preview.innerHTML=amount?lines:'Введите сумму, чтобы увидеть распределение.';
+      });
+    }
+    function openSavingForm(item){
+      const edit=!!item, currentPct=Number(item&&item.percent||0), other=state.money.savings.reduce((a,s)=>a+(s.id===(item&&item.id)?0:Number(s.percent||0)),0);
+      const html='<div class="field"><label>Название</label><input name="name" maxlength="24" required value="'+esc(item?item.name:"")+'" placeholder="БАНК"></div><div class="field"><label>Процент распределения</label><input name="percent" type="number" min="0" max="100" step="0.1" required value="'+currentPct+'"></div><div class="info" id="saving-free">Свободно: '+(100-other-currentPct)+'%</div>';
+      openSheet(edit?"Изменить накопление":"Новое накопление",html,(fd)=>{
+        const name=String(fd.get("name")||"").trim(),pct=Number(fd.get("percent")||0);
+        if(!name||pct<0||pct+other>100){toast("Сумма процентов не может быть больше 100%");return;}
+        if(edit){item.name=name;item.percent=pct;}else state.money.savings.push({id:uid(),name,percent:pct,balance:0});
+        save();closeSheet();render();
+      },edit?"Сохранить":"Создать");
+      const inp=$('input[name="percent"]',sheetContent), out=$("#saving-free");
+      inp.addEventListener("input",()=>{
+        const p=Number(inp.value||0),ok=p+other<=100;
+        out.textContent="Свободно: "+Math.max(0,100-other-p).toFixed(1).replace(/\.0$/,"")+"%";
+        const btn=$('button[type=submit]',sheetContent);btn.disabled=!ok;
+      });
+      const btn=$('button[type=submit]',sheetContent);btn.disabled=currentPct+other>100;
+    }
+    function openWithdraw(id){
+      const item=id==="free"?{name:"Свободные",balance:Number(state.money.freeBalance||0)}:state.money.savings.find(s=>s.id===id);
+      if(!item)return;
+      openSheet("Снять · "+esc(item.name),'<div class="subtle">Доступно: <b class="mono">'+moneyFmt(item.balance)+'</b></div><div class="field"><label>Сумма, ₽</label><input name="amount" type="number" min="0.01" max="'+item.balance+'" step="0.01" required></div><div class="field"><label>Заметка · необязательно</label><input name="note" placeholder="На что"></div>',async fd=>{
+        const amount=Math.round(Number(fd.get("amount")||0)*100)/100;if(amount<=0||amount>Number(item.balance)){toast("Сумма больше остатка");return;}
+        if(id==="free")state.money.freeBalance=Number(state.money.freeBalance)-amount;else item.balance=Number(item.balance)-amount;
+        addMoneyOp({type:"expense",amount,date:today(),savingId:id,note:String(fd.get("note")||"Снятие")});
+        save();closeSheet();render();
+      },"Снять");
+    }
+    async function deleteSaving(item){
+      if(Number(item.balance||0)>0){
+        const targets=state.money.savings.filter(s=>s.id!==item.id);
+        let html='<div class="subtle">На карте '+moneyFmt(item.balance)+'. Выберите действие.</div><div class="field"><label>Перевести в накопление</label><select name="target"><option value="">Выберите карту</option>'+targets.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>').join("")+'</select></div><button class="danger-btn full" type="button" data-action="saving-delete-money" data-id="'+esc(item.id)+'" style="margin-top:12px">Удалить вместе с суммой</button>';
+        openSheet("Удалить накопление",html,async(fd)=>{
+          const dest=state.money.savings.find(s=>s.id===fd.get("target"));if(!dest){toast("Выберите накопление");return;}
+          dest.balance=Number(dest.balance||0)+Number(item.balance); state.money.savings=state.money.savings.filter(s=>s.id!==item.id); save();closeSheet();render();
+        },"Перевести");
+      }else if(await confirmAction("Удалить накопление?","Карту «"+esc(item.name)+"» можно будет создать снова.","Удалить",true)){state.money.savings=state.money.savings.filter(s=>s.id!==item.id);save();render();}
+    }
+    function savingDetail(id){
+      const s=state.money.savings.find(x=>x.id===id);if(!s)return;
+      const ops=opsForSaving(id).slice(0,8);
+      const rows=ops.map(o=>'<div class="op-row"><div><div>'+esc(o.note||o.source||(o.type==="income"?"Доход":"Снятие"))+'</div><div class="subtle">'+dateLabel(o.date,{day:"numeric",month:"short"})+'</div></div><span class="op-amount '+(o.type==="income"?"positive":"negative")+'">'+(o.type==="income"?"+":"−")+moneyFmt(o.allocations?o.allocations.find(a=>a.savingId===id).amount:o.amount)+'</span></div>').join("");
+      openSheet(esc(s.name),'<div class="hero-count mono" style="font-size:32px">'+moneyFmt(s.balance)+'</div><div class="subtle">'+s.percent+'% распределения · изменения процента влияют на будущие доходы</div><div class="row" style="margin-top:8px"><button class="primary-btn full" type="button" data-action="withdraw" data-saving="'+esc(s.id)+'">Снять</button><button class="secondary-btn" type="button" data-action="saving-edit" data-id="'+esc(s.id)+'">Изменить</button></div><div class="eyebrow" style="margin-top:12px">ИСТОРИЯ ОПЕРАЦИЙ</div>'+(rows||'<div class="subtle">Операций пока нет.</div>')+'<button class="danger-btn full" type="button" data-action="saving-delete" data-id="'+esc(s.id)+'" style="margin-top:12px">Удалить накопление</button>',()=>{});
+      $('button[type="submit"]',sheetContent).closest(".sheet-actions").remove();
+    }
+    function recordBodySession(fd,taskId=null){
+      const minutes=Number(fd.get("minutes")||0);if(minutes<=0)return;
+      state.body.sessions.push({date:fd.get("date")||today(),minutes,notes:String(fd.get("notes")||"").trim(),taskId:taskId||undefined});
+      save();closeSheet();render();
+    }
+    function openBodySession(taskId=null,title=""){
+      const date=taskId?selectedDate:today();
+      openSheet("Запись тренировки",'<div class="field"><label>Длительность, мин</label><input name="minutes" type="number" min="1" max="600" required value="60"></div><div class="field"><label>Дата</label><input name="date" type="date" value="'+date+'"></div><div class="field"><label>Заметка</label><input name="notes" maxlength="80" value="'+esc(title)+'" placeholder="Упражнения, подходы × повторы"></div>',fd=>recordBodySession(fd,taskId),"Сохранить");
+    }
+    function addWeight(){
+      openSheet("Вес тела",'<div class="field"><label>Вес, кг</label><input name="kg" type="number" min="1" max="400" step="0.1" required></div><div class="field"><label>Дата</label><input name="date" type="date" value="'+today()+'"></div>',fd=>{state.body.weights.push({date:fd.get("date")||today(),kg:Number(fd.get("kg"))});save();closeSheet();render();},"Добавить");
+    }
+    function startTimer(){
+      const t=state.skill.timer;
+      if(t.running){t.elapsed=timerSeconds();t.running=false;t.startedAt=0;}
+      else{t.running=true;t.startedAt=Date.now();}
+      save();render();ensureTimerLoop();
+    }
+    function finishTimer(){
+      const t=state.skill.timer, seconds=timerSeconds(), minutes=Math.min(40,Math.floor(seconds/60));
+      if(minutes<=0){t.running=false;t.elapsed=0;save();render();return;}
+      const oldLevel=skillLevel(Number(state.skill.xp||0)).level;
+      const bonus=10, gained=minutes+bonus;
+      const d=getDay(today()), skillTask=(d.snapshot||[]).find(x=>x.block==="skill");
+      if(skillTask)d.done[skillTask.id]=true;
+      else if(inPeriod(today())&&d.snapshot.length<10){
+        const generated=task("Навык · 40 минут","skill",{id:"skill-timer-"+today(),kind:"timer"});
+        d.snapshot.push(generated);d.done[generated.id]=true;
+      }
+      state.skill.xp=Number(state.skill.xp||0)+gained;
+      state.skill.sessions.push({date:today(),minutes,xp:gained});
+      t.running=false;t.startedAt=0;t.elapsed=0;syncDay(today());save();render();
+      if(skillLevel(state.skill.xp).level>oldLevel){
+        const level=skillLevel(state.skill.xp).level;
+        openSheet("LEVEL UP",'<div class="pixel">'+Array.from({length:36},(_,i)=>'<i class="'+(i<Math.min(36,level*5)?"lit":"")+'"></i>').join("")+'</div><div class="level">Level '+level+'</div><div class="xp-text">+'+gained+' XP</div><div class="progress large"><div class="fill" data-value="100"></div></div>',()=>closeSheet(),"Продолжить");
+        animateIn();
+      }else toast("+"+gained+" XP");
+    }
+    function navTo(target){
+      view=target; if(target==="home")selectedDate=today(); render(); window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function selectedDayFromWeek(n){
+      const ws=weekStart(selectedDate);selectedDate=addDays(ws,n*7);render();
+    }
+    function setCycleTask(block,existing){
+      const html='<div class="field"><label>Название</label><input name="title" required maxlength="48" value="'+esc(existing?existing.title:"")+'"></div><div class="field"><label>Детали · необязательно</label><textarea name="details" maxlength="180" placeholder="Упражнения, подходы × повторы, страницы">'+esc(existing?existing.details:"")+'</textarea></div>';
+      openSheet(existing?"Изменить задачу":"Задача цикла",html,fd=>{
+        const title=String(fd.get("title")||"").trim(); if(!title)return;
+        const arr=state.cycle[cycleDay][block];
+        if(existing){existing.title=title;existing.details=String(fd.get("details")||"").trim();}
+        else arr.push(task(title,block,{details:String(fd.get("details")||"").trim()}));
+        refreshOpenDays();save();closeSheet();render();
+      },existing?"Сохранить":"Добавить");
+    }
+    function syncGodNote(){
+      const input=$("#god-note"); if(!input)return;
+      input.addEventListener("input",()=>{state.god.notes[today()]=input.value.slice(0,500);save();});
+    }
+    function renderSkillTimer(){
+      const el=$("#timer"); if(!el)return;
+      const remain=Math.max(0,2400-Math.floor(timerSeconds())), value=String(Math.floor(remain/60)).padStart(2,"0")+":"+String(remain%60).padStart(2,"0");
+      el.textContent=value;
+      if(remain===0&&state.skill.timer.running)finishTimer();
+    }
+    function ensureTimerLoop(){
+      if(state.skill.timer.running&&!timerTick)timerTick=setInterval(renderSkillTimer,1000);
+      if(!state.skill.timer.running&&timerTick){clearInterval(timerTick);timerTick=0;}
+    }
+    function toggleTask(date,id){
+      const d=getDay(date,false);if(!d)return;
+      if(date>today()||((date<today()||d.closed)&&!state.profile.allowPastEdit)){toast("Этот день закрыт");return;}
+      const t=d.snapshot.find(x=>x.id===id);if(!t)return;
+      const wasDone=!!d.done[id];
+      if(wasDone){
+        delete d.done[id];
+        state.body.sessions=state.body.sessions.filter(x=>x.taskId!==id);
+      }else{
+        d.done[id]=true;vibrate();
+      }
+      syncDay(date);save();render();
+      if(t.block==="body"&&!wasDone)openBodySession(id,t.title);
+    }
+    function cycleMove(block,index,delta){
+      const arr=state.cycle[cycleDay][block],n=index+delta;if(n<0||n>=arr.length)return;
+      const item=arr.splice(index,1)[0];arr.splice(n,0,item);refreshOpenDays();save();render();
+    }
+    function saveProfile(form){
+      const fd=new FormData(form), start=String(fd.get("start")),end=String(fd.get("end"));
+      if(end<start){toast("Дата окончания должна быть позже начала");return;}
+      state.profile.start=start;state.profile.end=end;state.profile.thresholdPct=clamp(Number(fd.get("threshold")||80),1,100);
+      state.profile.goals={body:Number(fd.get("goalBody")||0),money:Number(fd.get("moneyGoal")||0),skill:Number(fd.get("goalSkill")||0),god:Number(fd.get("goalGod")||0)};
+      state.profile.skillName=String(fd.get("skillName")||"Навык").trim();state.money.goal=Number(fd.get("moneyGoal")||0);
+      closeMissedDays();refreshOpenDays();save();render();toast("Цели сохранены");
+    }
+    function exportData(){
+      const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=randomName();a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }
+    async function importFile(file){
+      try{
+        const raw=JSON.parse(await file.text());
+        if(!raw||typeof raw!=="object"||!raw.profile||!raw.version)throw new Error("bad file");
+        if(await confirmAction("Импортировать данные?","Текущая копия будет заменена данными из файла.","Импортировать")){
+          state=migrate(raw);closeMissedDays();save();render();toast("Данные импортированы");
+        }
+      }catch(e){toast("Не удалось прочитать JSON");}
+    }
+    function resetAll(){
+      state=defaultState();localStorage.setItem(KEY,JSON.stringify(state));selectedDate=today();view="home";closeSheet();render();toast("Данные сброшены");
+    }
+    function startHold(el,action){
+      clearTimeout(holdTimer);el.classList.add("holding");
+      holdTimer=setTimeout(async()=>{
+        el.classList.remove("holding");
+        if(action==="reset"){
+          const ok=await confirmAction("Сбросить все данные?","Это действие удалит дневник, цикл и записи.","Сбросить",true);
+          if(ok)resetAll();
+        }else if(action==="streak"){
+          const type=el.dataset.streak;
+          const ok=await confirmAction("Обнулить серию?","Рекорд серии сохранится отдельно.","Обнулить",true);
+          if(ok){state.streaks[type].manualReset=today();save();render();}
+        }
+      },4000);
+    }
+    function stopHold(el){clearTimeout(holdTimer);if(el)el.classList.remove("holding");}
+    function saveIncomeUndo(op){
+      return confirmAction("Отменить доход?","Сумма вернётся в накопления согласно исходному распределению.","Отменить доход",true).then(ok=>{
+        if(!ok)return;
+        (op.allocations||[]).forEach(a=>{if(a.savingId==="free")state.money.freeBalance=Number(state.money.freeBalance||0)-a.amount;else{const s=state.money.savings.find(x=>x.id===a.savingId);if(s)s.balance=Number(s.balance||0)-a.amount;}});
+        state.money.ops=state.money.ops.filter(x=>x.id!==op.id);save();closeSheet();render();
+      });
+    }
+    function listen(){
+      nav.addEventListener("click",e=>{const b=e.target.closest("[data-nav]");if(b)navTo(b.dataset.nav);});
+      document.addEventListener("click",async e=>{
+        const b=e.target.closest("[data-action]");if(!b)return;
+        const a=b.dataset.action;
+        if(a==="go-home"){navTo("home");return;}
+        if(a==="open-cycle"){navTo("cycle");return;}
+        if(a==="open-profile"){navTo("profile");return;}
+        if(a==="select-date"){selectedDate=b.dataset.date;render();return;}
+        if(a==="week-prev"){selectedDayFromWeek(-1);return;}
+        if(a==="week-next"){selectedDayFromWeek(1);return;}
+        if(a==="collapse"){const k=b.dataset.key;collapsed[k]=collapsed[k]!==true;render();return;}
+        if(a==="toggle-task"){toggleTask(b.dataset.date,b.dataset.id);return;}
+        if(a==="add-task"){
+          const day=getDay(selectedDate,inPeriod(selectedDate));
+          if(!inPeriod(selectedDate)){toast("Задачи доступны в периоде челленджа");return;}
+          if(day.snapshot.length>=10){toast("В дне максимум 10 задач");return;}
+          openSheet("Новая задача",'<div class="field"><label>Название</label><input name="title" required maxlength="48" placeholder="Например, покупки"></div><div class="field"><label>Блок</label><select name="block"><option value="daily">Дела дня</option><option value="body">Тело</option><option value="skill">Навык</option><option value="recovery">Восстановление</option></select></div>',addCustomTask,"Добавить");return;
+        }
+        if(a==="remove-custom"){
+          const d=getDay(b.dataset.date,false);if(!d)return;
+          const t=d.snapshot.find(x=>x.id===b.dataset.id);if(!t||t.kind!=="custom")return;
+          if(await confirmAction("Удалить задачу?","Задача будет удалена из этого дня.","Удалить",true)){d.snapshot=d.snapshot.filter(x=>x.id!==t.id);delete d.done[t.id];syncDay(b.dataset.date);save();render();}
+          return;
+        }
+        if(a==="edit-custom"){editCustomTask(b.dataset.date,b.dataset.id);return;}
+        if(a==="cycle-day"){cycleDay=b.dataset.day;render();return;}
+        if(a==="cycle-add"){setCycleTask(b.dataset.block,null);return;}
+        if(a==="cycle-edit"){const item=state.cycle[cycleDay][b.dataset.block].find(x=>x.id===b.dataset.id);if(item)setCycleTask(b.dataset.block,item);return;}
+        if(a==="cycle-delete"){
+          const arr=state.cycle[cycleDay][b.dataset.block];if(await confirmAction("Удалить задачу цикла?","Будущие дни обновятся, прошлые останутся без изменений.","Удалить",true)){state.cycle[cycleDay][b.dataset.block]=arr.filter(x=>x.id!==b.dataset.id);refreshOpenDays();save();render();}return;
+        }
+        if(a==="cycle-up"){cycleMove(b.dataset.block,Number(b.dataset.index),-1);return;}
+        if(a==="cycle-down"){cycleMove(b.dataset.block,Number(b.dataset.index),1);return;}
+        if(a==="cycle-copy"){
+          const selected=$$(".copy-day:checked").map(x=>x.value);if(!selected.length){toast("Выберите дни");return;}
+          selected.forEach(k=>state.cycle[k]=JSON.parse(JSON.stringify(state.cycle[cycleDay])));refreshOpenDays();save();render();toast("Цикл скопирован");return;
+        }
+        if(a==="body-session"){openBodySession();return;}
+        if(a==="weight-add"){addWeight();return;}
+        if(a==="timer-toggle"){
+          if(!state.skill.timer.running){startTimer();return;}
+          startTimer();return;
+        }
+        if(a==="timer-reset"){state.skill.timer={running:false,startedAt:0,elapsed:0};save();render();return;}
+        if(a==="god-done"){
+          const d=getDay(today()),t=d.snapshot.find(x=>x.block==="god");if(t){if(d.done[t.id])delete d.done[t.id];else d.done[t.id]=true;syncDay(today());save();render();}return;
+        }
+        if(a==="saving-create"){openSavingForm(null);return;}
+        if(a==="income"){openIncome();return;}
+        if(a==="saving-detail"){savingDetail(b.dataset.saving);return;}
+        if(a==="saving-edit"){const s=state.money.savings.find(x=>x.id===b.dataset.id);closeSheet();if(s)openSavingForm(s);return;}
+        if(a==="saving-delete"){const s=state.money.savings.find(x=>x.id===b.dataset.id);closeSheet();if(s)await deleteSaving(s);return;}
+        if(a==="saving-delete-money"){
+          const s=state.money.savings.find(x=>x.id===b.dataset.id);
+          if(s&&await confirmAction("Удалить вместе с суммой?","Будут удалены "+moneyFmt(s.balance)+".","Удалить",true)){state.money.savings=state.money.savings.filter(x=>x.id!==s.id);save();closeSheet();render();}
+          return;
+        }
+        if(a==="withdraw"){const id=b.dataset.saving;closeSheet();openWithdraw(id);return;}
+        if(a==="undo-income"){const op=state.money.ops.find(x=>x.id===b.dataset.id);if(op)await saveIncomeUndo(op);return;}
+        if(a==="photo-select"){state.profile.photo=b.dataset.photo;save();render();return;}
+        if(a==="photo-upload"){$("#photo-file").click();return;}
+        if(a==="toggle-past"){state.profile.allowPastEdit=!state.profile.allowPastEdit;save();render();return;}
+        if(a==="save-streak-goal"){const input=$('[data-streak-goal="'+b.dataset.streak+'"]');state.streaks[b.dataset.streak].goal=Math.max(0,Number(input.value||0));save();render();toast("Цель серии сохранена");return;}
+        if(a==="restore-streaks"){Object.values(state.streaks).forEach(x=>x.deleted=false);save();render();return;}
+        if(a==="export"){exportData();return;}
+        if(a==="import"){$("#import-file").click();return;}
+        if(a==="reset-hold"){startHold(b,"reset");return;}
+        if(a==="close-sheet"){closeSheet();return;}
+        if(a==="confirm-no"){closeSheet(false);return;}
+        if(a==="confirm-yes"){closeSheet(true);return;}
+      });
+      screen.addEventListener("submit",e=>{
+        if(e.target.id==="profile-form"){e.preventDefault();saveProfile(e.target);}
+      });
+      screen.addEventListener("input",e=>{
+        if(e.target.id==="god-note"){state.god.notes[today()]=e.target.value.slice(0,500);save();}
+      });
+      $("#import-file").addEventListener("change",e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value="";});
+      $("#photo-file").addEventListener("change",async e=>{
+        const file=e.target.files[0];if(!file)return;
+        try{
+          const img=new Image(),url=URL.createObjectURL(file);await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url;});
+          const canvas=document.createElement("canvas"),scale=Math.min(1,1200/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+          const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          let q=.82,data=canvas.toDataURL("image/jpeg",q);while(data.length>800*1024&&q>.4){q-=.08;data=canvas.toDataURL("image/jpeg",q);}
+          if(data.length>800*1024)throw new Error("large");state.profile.photo=data;save();render();URL.revokeObjectURL(url);
+        }catch(err){toast("Фото не удалось сжать до 800 КБ");}e.target.value="";
+      });
+      document.addEventListener("pointerdown",e=>{
+        const streak=e.target.closest(".streak-card[data-streak]");
+        const reset=e.target.closest('[data-action="reset-hold"]');
+        const custom=e.target.closest("[data-custom-edit]");
+        const button=e.target.closest("button");
+        if(button&&!matchMedia("(prefers-reduced-motion: reduce)").matches)motionAnimate(button,{scale:[1,.95,1]},{type:"spring",stiffness:520,damping:28,duration:.22});
+        if(streak)startHold(streak,"streak");
+        if(reset)startHold(reset,"reset");
+        if(custom){clearTimeout(customPressTimer);customPressTimer=setTimeout(()=>editCustomTask(selectedDate,custom.dataset.customEdit),550);}
+      });
+      document.addEventListener("pointerup",()=>{stopHold($(".streak-card.holding,[data-action=reset-hold].holding"));clearTimeout(customPressTimer);});
+      document.addEventListener("pointercancel",()=>{stopHold($(".streak-card.holding,[data-action=reset-hold].holding"));clearTimeout(customPressTimer);});
+      document.addEventListener("touchstart",e=>{
+        const card=e.target.closest(".saving-card[data-saving]");if(card)card.dataset.touchX=e.touches[0].clientX;
+        const streak=e.target.closest(".streak-card[data-streak]");if(streak){streak.dataset.swipeX=e.touches[0].clientX;streak.dataset.swipeY=e.touches[0].clientY;}
+      },{passive:true});
+      document.addEventListener("touchend",e=>{
+        const card=e.target.closest(".saving-card[data-saving]");if(!card||!card.dataset.touchX)return;
+        const delta=e.changedTouches[0].clientX-Number(card.dataset.touchX);delete card.dataset.touchX;
+        if(delta<-60){const s=state.money.savings.find(x=>x.id===card.dataset.saving);if(s)deleteSaving(s);}
+      },{passive:true});
+      document.addEventListener("touchend",async e=>{
+        const card=e.target.closest(".streak-card[data-streak]");if(!card||!card.dataset.swipeX)return;
+        const dx=e.changedTouches[0].clientX-Number(card.dataset.swipeX),dy=e.changedTouches[0].clientY-Number(card.dataset.swipeY);
+        delete card.dataset.swipeX;delete card.dataset.swipeY;
+        if(dx<-70&&Math.abs(dy)<35){
+          stopHold(card);
+          if(await confirmAction("Удалить панель?","Её можно будет восстановить в Профиле.","Удалить",true)){
+            state.streaks[card.dataset.streak].deleted=true;save();render();
+          }
+        }
+      },{passive:true});
+      document.addEventListener("dragstart",e=>{
+        const row=e.target.closest("[data-cycle-row]");if(!row)return;
+        dragCycle={block:row.dataset.block,index:Number(row.dataset.index)};
+        if(e.dataTransfer)e.dataTransfer.effectAllowed="move";
+      });
+      document.addEventListener("dragover",e=>{if(e.target.closest("[data-cycle-row]"))e.preventDefault();});
+      document.addEventListener("drop",e=>{
+        const row=e.target.closest("[data-cycle-row]");if(!row||!dragCycle)return;
+        e.preventDefault();
+        const targetBlock=row.dataset.block,targetIndex=Number(row.dataset.index);
+        if(targetBlock===dragCycle.block){
+          const arr=state.cycle[cycleDay][targetBlock],item=arr.splice(dragCycle.index,1)[0];
+          arr.splice(targetIndex,0,item);refreshOpenDays();save();render();
+        }
+        dragCycle=null;
+      });
+      document.addEventListener("pointermove",e=>{
+        const card=e.target.closest(".spotlight");if(card){const r=card.getBoundingClientRect();card.style.setProperty("--mx",(e.clientX-r.left)+"px");card.style.setProperty("--my",(e.clientY-r.top)+"px");}
+      });
+      $("#sheet-backdrop").addEventListener("click",e=>{if(e.target===backdrop)closeSheet();});
+      screen.addEventListener("touchstart",e=>{if(view==="home"&&e.target.closest(".week-card"))screen.dataset.touchX=e.touches[0].clientX;},{passive:true});
+      screen.addEventListener("touchend",e=>{
+        if(view!=="home"||screen.dataset.touchX==null||!e.target.closest(".week-card")){delete screen.dataset.touchX;return;}
+        const dx=e.changedTouches[0].clientX-Number(screen.dataset.touchX);delete screen.dataset.touchX;
+        if(Math.abs(dx)>70)selectedDayFromWeek(dx<0?1:-1);
+      },{passive:true});
+    }
+
+    closeMissedDays();
+    if(inPeriod(today())&&!state.days[today()])state.days[today()]=buildSnapshot(today());
+    if(!inPeriod(today())&&today()<state.profile.start)selectedDate=today();
+    else if(today()>state.profile.end)selectedDate=state.profile.end;
+    save();
+    listen();
+    render();
+    if(state.skill.timer.running&&timerSeconds()>=2400)finishTimer();
+    checkGodReminder();
+    setInterval(checkGodReminder,30000);
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible"){
+        closeMissedDays();if(inPeriod(today())&&!state.days[today()])state.days[today()]=buildSnapshot(today());
+        save();if(state.skill.timer.running&&!timerTick)timerTick=setInterval(renderSkillTimer,1000);render();checkGodReminder();
+      }
+    });
+    function scheduleMidnight(){
+      const now=new Date(),next=new Date(now);next.setHours(24,0,2,0);
+      setTimeout(()=>{closeMissedDays();if(inPeriod(today())&&!state.days[today()])state.days[today()]=buildSnapshot(today());selectedDate=today();save();render();scheduleMidnight();},Math.max(1000,next-now));
+    }
+    scheduleMidnight();
+    if("serviceWorker" in navigator && location.protocol!=="file:") navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  </script>
+</body>
+</html>
