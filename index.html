@@ -46,7 +46,7 @@
     .hero{min-height:158px;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 18px 16px;border-color:rgba(255,255,255,.1)}
     .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(5,7,12,.9),rgba(7,9,14,.5) 78%),radial-gradient(ellipse at 75% 20%,rgba(30,47,77,.2),transparent 60%);pointer-events:none}
     .hero>*{position:relative}.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-    .streak-actions{display:flex;align-items:center;gap:8px}.streak-photo-btn{width:40px;height:40px;min-height:40px;padding:0;border-radius:50%;display:grid;place-items:center;background:rgba(10,12,16,.56);border:1px solid rgba(255,255,255,.25);color:#fff;backdrop-filter:blur(8px);z-index:2}.streak-photo-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .streak-setting-row{display:grid;gap:9px;padding:11px;border-radius:16px;background:var(--s2)}.streak-photo-setting{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:9px}.streak-photo-preview{width:52px;height:42px;border-radius:10px;background-size:cover;background-position:center;background-color:var(--s3)}.streak-photo-setting .secondary-btn{min-height:44px;padding:0 12px;font-size:12px}
     .hero-count{font:500 46px/1 var(--mono);letter-spacing:-.08em;color:#f1f1f2;text-shadow:0 2px 16px #000}
     .hero-name{font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:8px;color:#eee}
     .hero-foot{display:flex;align-items:center;gap:14px;margin-top:13px}.hero-foot .subtle{color:#c0c1c5}
@@ -352,7 +352,7 @@
       const data=currentStreak(type), max=Number(st.goal||0), pct=max?clamp(data.count/max*100,0,100):0;
       const photo=st.photo||image||"";
       const days=data.week.map(x=>'<i class="'+(x.done?'done':'')+'"></i>').join("");
-      return '<article class="card hero streak-card spotlight" data-streak="'+type+'" style="background-image:url(\''+esc(photo)+'\')"><div class="hold-ring"></div><div class="hero-top"><div><div class="hero-name">'+esc(title)+'</div><div class="hero-count mono" data-counter="'+data.count+'">'+data.count+'</div></div><div class="streak-actions"><button type="button" class="streak-photo-btn" data-action="streak-photo" data-streak="'+type+'" aria-label="Выбрать фото панели '+esc(title)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l1.5-2h7L17 7h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><div class="pill">'+(max?data.count+" / "+max+" дн.":"дней")+'</div></div></div><div class="hero-foot"><div class="week-dots">'+days+'</div><div class="subtle">Лучшая серия: <span class="mono">'+data.best+'</span></div></div>'+(max?'<div class="progress" style="margin-top:12px"><div class="fill" data-value="'+pct+'"></div></div>':"")+'<div class="subtle" style="margin-top:8px;font-size:10px">'+esc(subtitle)+' · удерживайте 4 сек. для сброса</div></article>';
+      return '<article class="card hero streak-card spotlight" data-streak="'+type+'" style="background-image:url(\''+esc(photo)+'\')"><div class="hold-ring"></div><div class="hero-top"><div><div class="hero-name">'+esc(title)+'</div><div class="hero-count mono" data-counter="'+data.count+'">'+data.count+'</div></div><div class="pill">'+(max?data.count+" / "+max+" дн.":"дней")+'</div></div><div class="hero-foot"><div class="week-dots">'+days+'</div><div class="subtle">Лучшая серия: <span class="mono">'+data.best+'</span></div></div>'+(max?'<div class="progress" style="margin-top:12px"><div class="fill" data-value="'+pct+'"></div></div>':"")+'<div class="subtle" style="margin-top:8px;font-size:10px">'+esc(subtitle)+' · удерживайте 4 сек. для сброса</div></article>';
     }
     function blockStatus(s,block){
       if(s>today()) return "";
@@ -553,6 +553,11 @@
       const photos=[["batman.jpg","По умолчанию"],["signal.jpg","Сигнал"],["bat-mark.jpg","Знак"],["portrait.jpg","Портрет"]];
       const uploadedPhoto=state.profile.photo&&state.profile.photo.startsWith("data:")?'<div class="photo-choice active uploaded-photo" role="img" aria-label="Загруженное фото" style="background-image:url(\''+state.profile.photo+'\')"></div>':"";
       const photoHtml=uploadedPhoto+photos.map(p=>'<button type="button" class="photo-choice '+(state.profile.photo===p[0]?"active":"")+'" data-action="photo-select" data-photo="'+p[0]+'" title="'+p[1]+'" style="background-image:linear-gradient(0deg,rgba(0,0,0,.18),transparent),url(\''+ASSET+p[0]+'\')"></button>').join("");
+      const streakSettingsHtml=["isolation","training","god"].map((k,i)=>{
+        const fallback=k==="isolation"?(state.profile.photo&&state.profile.photo.startsWith("data:")?state.profile.photo:ASSET+(state.profile.photo||"batman.jpg")):k==="training"?ASSET+"bat-mark.jpg":ASSET+"batman.jpg";
+        const photo=state.streaks[k].photo||fallback;
+        return '<div class="streak-setting-row"><div class="inline-field"><div class="field"><label>'+["Изоляция","Тренировки подряд","В жизни во Христе"][i]+' · цель в днях</label><input data-streak-goal="'+k+'" type="number" min="0" value="'+Number(state.streaks[k].goal||0)+'"></div><button class="secondary-btn" data-action="save-streak-goal" data-streak="'+k+'">Сохранить цель</button></div><div class="streak-photo-setting"><div class="streak-photo-preview" data-streak-preview="'+k+'" style="background-image:url(\''+esc(photo)+'\')"></div><span class="subtle">Фото фона панели</span><button class="secondary-btn" data-action="streak-photo" data-streak="'+k+'">Выбрать фото</button></div></div>';
+      }).join("");
       const goals=goalsProgress(), activeGoals=goals.filter(x=>x.goal>0);
       const overall=activeGoals.length?Math.round(activeGoals.reduce((a,x)=>a+clamp(x.value/x.goal*100,0,100),0)/activeGoals.length):0;
       const goalHtml=goals.map(x=>'<div class="goal-row"><span class="subtle">'+esc(x.name)+'</span><span class="mono">'+(x.unit==="₽"?moneyFmt(x.value):x.value+" "+x.unit)+' / '+(x.goal?(x.unit==="₽"?moneyFmt(x.goal):x.goal+" "+x.unit):"цель не задана")+'</span>'+(x.goal?pctBar(x.value,x.goal):'<div class="subtle">Цель не задана</div>')+'</div>').join("");
@@ -562,7 +567,7 @@
         '<section class="card"><div class="card-head"><span class="eyebrow">ПРОГРЕСС К ЦЕЛЯМ</span><b class="mono">'+overall+'%</b></div>'+pctBar(overall,100)+'<div class="form-grid" style="margin-top:14px">'+goalHtml+'</div></section>'+
         '<section class="card"><div class="card-head"><span class="eyebrow">ФОТО ИЗОЛЯЦИИ</span></div><div class="photo-options">'+photoHtml+'</div><button class="secondary-btn full" style="margin-top:10px" data-action="photo-upload">Загрузить фото</button><div class="subtle" style="margin-top:8px">Фото автоматически сжимается для хранения.</div></section>'+ 
         '<section class="card"><div class="row between"><div><div class="section-label">Правка прошлых дней</div><div class="subtle">По умолчанию выключена</div></div><button class="toggle '+(state.profile.allowPastEdit?"on":"")+'" data-action="toggle-past" aria-pressed="'+!!state.profile.allowPastEdit+'"><i></i></button></div></section>'+
-        '<section class="card"><div class="eyebrow">ПАНЕЛИ СТИКОВ</div><div class="form-grid" style="margin-top:13px">'+["isolation","training","god"].map((k,i)=>'<div class="inline-field"><div class="field"><label>'+["Изоляция","Тренировки подряд","В жизни во Христе"][i]+' · цель в днях</label><input data-streak-goal="'+k+'" type="number" min="0" value="'+Number(state.streaks[k].goal||0)+'"></div><button class="secondary-btn" data-action="save-streak-goal" data-streak="'+k+'">Сохранить</button></div>').join("")+(Object.values(state.streaks).some(x=>x.deleted)?'<button class="secondary-btn full" data-action="restore-streaks">Восстановить панели</button>':"")+'</div></section>'+
+        '<section class="card"><div class="eyebrow">ПАНЕЛИ СТИКОВ</div><div class="form-grid" style="margin-top:13px">'+streakSettingsHtml+(Object.values(state.streaks).some(x=>x.deleted)?'<button class="secondary-btn full" data-action="restore-streaks">Восстановить панели</button>':"")+'</div></section>'+
         '<section class="card"><div class="eyebrow">ДАННЫЕ</div><div class="subtle" style="margin:8px 0 14px">Часовой пояс устройства: '+esc(tz)+'</div><div class="row wrap"><button class="secondary-btn" data-action="export">Экспорт данных</button><button class="secondary-btn" data-action="import">Импорт данных</button></div><div class="subtle" style="margin-top:10px">Библия в 23:00 · при необходимости добавьте системное напоминание.</div></section>'+
         '<button class="danger-btn full" data-action="reset-hold">Удерживайте 4 сек. · Сбросить всё</button>';
     }
@@ -963,6 +968,7 @@
         try{
           const data=await compressPhoto(file);state.streaks[type].photo=data;save();
           const card=$('.streak-card[data-streak="'+type+'"]');if(card)card.style.backgroundImage='url("'+data+'")';
+          const preview=$('[data-streak-preview="'+type+'"]');if(preview)preview.style.backgroundImage='url("'+data+'")';
           toast("Фото панели сохранено");
         }catch(err){toast("Фото не удалось обработать");}e.target.value="";delete e.target.dataset.streak;
       });
@@ -972,7 +978,6 @@
         catch(err){toast("Фото не удалось обработать");}e.target.value="";
       }));
       document.addEventListener("pointerdown",e=>{
-        if(e.target.closest(".streak-photo-btn"))return;
         const streak=e.target.closest(".streak-card[data-streak]");
         const reset=e.target.closest('[data-action="reset-hold"]');
         const custom=e.target.closest("[data-custom-edit]");
