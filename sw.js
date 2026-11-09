@@ -1,4 +1,4 @@
-const CACHE = "free26-v1.0.2";
+const CACHE = "free26-v1.0.3";
 const FILES = [
   "./",
   "./index.html",
